@@ -1,6 +1,5 @@
 import * as path from 'path';
 import * as agent from 'superagent';
-
 import {BehaviorSubject, Observable, Observer} from 'rxjs';
 import {filter} from 'rxjs/operators';
 

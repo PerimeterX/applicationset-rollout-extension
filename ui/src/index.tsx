@@ -1,7 +1,6 @@
-import React, {useEffect, useState} from "react";
 import requests from "./requests";
 import deepMerge from "deepmerge";
-
+import * as React from "react";
 
 const MAP_STATUS = {
     Healthy: {name: "fa-heart", spin: false, color: "rgb(24, 190, 148)"},
@@ -92,8 +91,8 @@ export interface Health {
 
 
 export const Extension = (props: { application: any; tree: any; resource: any }) => {
-    const [data, setData] = useState<string[]>([]);
-    const [checkedItems, setCheckedItems] = useState<Map<string, any>>(new Map());
+    const [data, setData] = React.useState<string[]>([]);
+    const [checkedItems, setCheckedItems] = React.useState<Map<string, any>>(new Map());
     const checkAll = (items: any) => {
         setCheckedItems((prevState) => {
             const newState = {...prevState};
@@ -158,7 +157,7 @@ export const Extension = (props: { application: any; tree: any; resource: any })
         }
         setCheckedItems(new Map());
     };
-    useEffect(() => {
+    React.useEffect(() => {
         const fetchData = async () => {
             const parentUid = props.resource.metadata.uid;
             // @ts-ignore

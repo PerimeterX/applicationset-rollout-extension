@@ -12,7 +12,6 @@
   "devDependencies": {
     "@types/react": "^16.8.5",
     "css-loader": "^6.7.3",
-    "@types/superagent": "^8.1.8",
     "mini-css-extract-plugin": "^2.7.2",
     "node-sass": "^8.0.0",
     "raw-loader": "^4.0.2",
@@ -22,11 +21,10 @@
     "sass-loader": "^13.2.0",
     "style-loader": "^3.3.1",
     "ts-loader": "9.4.2",
-    "webpack": "^5.93.0",
-    "deepmerge": "^3.2.0",
-    "path": "^0.12.7",
     "rxjs": "^6.6.6",
-    "superagent": "^8.1.2"
+    "superagent": "^8.1.2",
+    "deepmerge": "^3.2.0",
+    "path": "^0.12.7"
   },
   "dependencies": {
     "typescript": "^4.9.3",
