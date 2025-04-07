@@ -1,0 +1,19 @@
+.application-sets {
+    &-list {
+        padding: 1em;
+        
+        .argo-table-list {
+            &__row {
+                padding-left: 1em;
+                padding-right: 1em;
+                border-left: 0;
+                border-right: 0;
+                
+                .columns {
+                    padding-left: 1em;
+                    padding-right: 1em;
+                }
+            }
+        }
+    }
+} 
