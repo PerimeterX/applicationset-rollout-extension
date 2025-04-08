@@ -1,5 +1,6 @@
+import * as React from 'react';
 import {ApplicationSetTab} from "./application-set-tab/application-set-tab";
-import {ApplicationSets} from './application-sets/application-sets';
+// import {ApplicationSets} from './application-sets/application-sets';
 import {PrettyLogsTab} from './pretty-logs/pretty-logs-tab';
 
 ((window: any) => {
@@ -15,7 +16,7 @@ import {PrettyLogsTab} from './pretty-logs/pretty-logs-tab';
 
     // Register the ApplicationSets component as a system level extension
     window.extensionsAPI.registerSystemLevelExtension(
-        ApplicationSets,
+        <div>Hello</div>,
         'Application Sets',
         '/application-sets',
         'fa-solid fa-server'
