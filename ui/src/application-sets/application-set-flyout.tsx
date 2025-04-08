@@ -1,12 +1,12 @@
 import * as React from 'react';
 import {useState, useEffect} from 'react';
 
-import {SlidingPanel, DropDownMenu} from 'argo-ui';
 import * as moment from 'moment';
-
+import {SlidingPanel} from '../shared-components/sliding-panel/sliding-panel';
+import {DropDownMenu} from '../shared-components/dropdown-menu';
 import {ApplicationSet, Application, HealthStatusCode} from './models';
 import {getApplication, runResourceAction, syncApplication} from './service';
-import {NotificationBar, Notification} from "./notification-bar";
+import {NotificationBar, Notification} from "../shared-components/notification-bar/notification-bar";
 
 import './application-set-flyout.scss';
 

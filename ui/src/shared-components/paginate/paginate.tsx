@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useState, useEffect} from 'react';
 
-import {DropDownMenu} from 'argo-ui';
+import {DropDownMenu} from '../dropdown-menu';
 import ReactPaginate from 'react-paginate';
 
 import './paginate.scss';

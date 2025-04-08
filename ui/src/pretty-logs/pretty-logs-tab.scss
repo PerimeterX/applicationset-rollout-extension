@@ -155,7 +155,6 @@
 }
 
 .log-additional-fields {
-    color: #ffa7c4;
     font-size: 11px;
     display: flex;
     flex-wrap: wrap;
@@ -163,12 +162,14 @@
 }
 
 .log-additional-field {
-    background-color: rgba(188, 255, 167, 0.1);
+    background-color: rgba(249, 255, 167, 0.1);
+    color: #ffe0a7;
     padding: 0 4px;
     border-radius: 2px;
 
     &--error {
         background-color: rgba(255, 167, 196, 0.1);
+        color: #ffa7c4;
     }
 }
 

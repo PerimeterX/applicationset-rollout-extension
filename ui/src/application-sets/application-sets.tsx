@@ -1,13 +1,13 @@
 import * as React from 'react';
 
-import {DataLoader, Autocomplete} from 'argo-ui';
 import {Key, KeybindingContext, KeybindingProvider} from '../shared-components/keypress';
-
+import {DataLoader} from '../shared-components/data-loader';
+import {Autocomplete} from '../shared-components/autocomplete';
 import {ApplicationSet} from './models';
 import {ApplicationSetTiles} from './application-set-tiles';
 import {listApplicationSets} from './service';
 import {NavigationManager} from '../shared-components/navigation';
-import {NotificationBar, Notification} from './notification-bar';
+import {NotificationBar, Notification} from '../shared-components/notification-bar/notification-bar';
 import './application-sets.scss';
 
 interface AutocompleteItem {

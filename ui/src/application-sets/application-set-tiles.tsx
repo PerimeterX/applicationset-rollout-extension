@@ -1,14 +1,15 @@
 import * as React from 'react';
 
 import * as moment from 'moment';
-import {DataLoader, Tooltip} from 'argo-ui';
 import classNames from 'classnames';
 
+import {Tooltip} from '../shared-components/tooltip';
+import {DataLoader} from '../shared-components/data-loader';
 import {ApplicationSet, ApplicationSource} from './models';
 import {Paginate} from '../shared-components/paginate/paginate';
 import {getApplication} from './service';
 import {ApplicationSetFlyout} from './application-set-flyout';
-import {NotificationBar, Notification} from './notification-bar';
+import {NotificationBar, Notification} from '../shared-components/notification-bar/notification-bar';
 import './application-set-tiles.scss';
 
 export interface ApplicationSetTilesProps {
