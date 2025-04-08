@@ -1,6 +1,6 @@
 import { ApplicationSetTab } from "./application-set-tab/application-set-tab";
 // import {ApplicationSets} from './application-sets/application-sets';
-// import {PrettyLogsTab} from './pretty-logs/pretty-logs-tab';
+import {PrettyLogsTab} from './pretty-logs/pretty-logs-tab';
 
 ((window: any) => {
     
@@ -21,13 +21,13 @@ import { ApplicationSetTab } from "./application-set-tab/application-set-tab";
     //     'fa-solid fa-server'
     // );
 
-    // // Register the Pretty Logs tab extension using the global extensions API
-    // (window as any).extensionsAPI.registerResourceExtension(
-    //     PrettyLogsTab,
-    //     '**',
-    //     'Pod',
-    //     'Pretty Logs',
-    //     {icon: 'fa fa-binoculars'}
-    // );
+    // Register the Pretty Logs tab extension using the global extensions API
+    (window as any).extensionsAPI.registerResourceExtension(
+        PrettyLogsTab,
+        '**',
+        'Pod',
+        'Pretty Logs',
+        {icon: 'fa fa-binoculars'}
+    );
 
 })(window);

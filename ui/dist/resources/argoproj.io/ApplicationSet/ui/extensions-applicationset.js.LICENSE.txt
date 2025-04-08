@@ -42,7 +42,3 @@ object-assign
 * (c) 2017-2020 atomiks
 * MIT License
 */
-
-//! moment.js
-
-//! moment.js locale configuration
