@@ -19,7 +19,7 @@ import {PrettyLogsTab} from './pretty-logs/pretty-logs-tab';
         <div>Hello</div>,
         'Application Sets',
         '/application-sets',
-        'fa-solid fa-server'
+        {icon: 'fa-solid fa-server'}
     );
 
     // Register the Pretty Logs tab extension using the global extensions API
