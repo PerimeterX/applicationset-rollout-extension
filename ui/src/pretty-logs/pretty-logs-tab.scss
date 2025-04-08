@@ -163,9 +163,13 @@
 }
 
 .log-additional-field {
-    background-color: rgba(255, 167, 196, 0.1);
+    background-color: rgba(188, 255, 167, 0.1);
     padding: 0 4px;
     border-radius: 2px;
+
+    &--error {
+        background-color: rgba(255, 167, 196, 0.1);
+    }
 }
 
 .log-mode-indicator {

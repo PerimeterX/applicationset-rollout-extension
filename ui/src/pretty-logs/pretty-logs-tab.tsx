@@ -39,15 +39,17 @@ const determineLogMode = (logs: LogEntry[]): 'json' | 'raw' => {
 const formatLogLine = (content: string) => {
     try {
         const json = JSON.parse(content);
-        const level = json.level || 'info';
-        const msg = json.msg || '';
-        const time = json.time || '';
+        const level = json.level || json.lvl || json.severity || 'info';
+        const msg = json.msg || json.message || '';
+        const time = json.time || json.timestamp || '';
         
         // Get all fields except level, msg, and time
         const additionalFields = Object.entries(json)
-            .filter(([key]) => !['level', 'msg', 'time'].includes(key))
+            .filter(([key]) => !['level', 'lvl', 'severity', 'msg', 'message', 'time', 'timestamp'].includes(key))
             .map(([key, value]) => (
-                <span key={key} className='log-additional-field'>
+                <span key={key} className={`log-additional-field ${key === 'err' || key === 'error' ? 'log-additional-field--error' : 
+                    key === 'warn' ? 'log-additional-field--warn' : 
+                    key === 'info' ? 'log-additional-field--info' : 'log-additional-field--debug'}`}>
                     {key}={JSON.stringify(value)}
                 </span>
             ));
