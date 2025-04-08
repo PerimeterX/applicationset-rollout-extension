@@ -4,7 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "peerDeependencies": {
-    "react": "^16.9.3"
+    "@types/react": "^16.8.5",
+    "react": "^16.9.3",
+    "react-dom": "^16.9.3"
   },
   "scripts": {
     "build": "rm -rf dist && NODE_ENV=production webpack --config webpack.config.js && tar -C dist -cvf dist/extension.tar resources"
@@ -26,13 +28,17 @@
     "webpack-cli": "^5.0.0"
   },
   "dependencies": {
+    "@tippy.js/react": "^3.1.1",
+    "classnames": "^2.5.1",
     "deepmerge": "^3.2.0",
+    "history": "^4.10.1",
     "path": "^0.12.7",
+    "react-autocomplete": "1.8.1",
     "react-moment": "^0.9.7",
     "react-paginate": "^8.3.0",
-    "rxjs": "^6.6.6",
+    "rxjs": "^7.8.1",
     "superagent": "^8.1.2",
     "tippy.js": "^6.3.7",
-    "uuid": "^3.4.0"
+    "uuid": "^9.0.0"
   }
 }
