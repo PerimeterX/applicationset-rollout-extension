@@ -12,9 +12,6 @@ const config = {
         libraryTarget: 'window',
         library: ['extensions', 'resources', groupKind],
     },
-    optimization: {
-        minimize: false
-    },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.json', '.ttf', '.scss'],
     },
