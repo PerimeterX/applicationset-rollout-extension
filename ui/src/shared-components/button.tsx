@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {CSSProperties, MouseEventHandler, ReactNode} from 'react';
 import {Icon} from './icon';
-import {Tooltip} from 'argo-ui';
+import {Tooltip} from './tooltip/tooltip';
 
 export const Button = ({
     onClick,
