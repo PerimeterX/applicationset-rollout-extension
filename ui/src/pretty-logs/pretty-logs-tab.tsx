@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useEffect, useState, useRef} from 'react';
 
-import {Tooltip} from '../shared-components/tooltip/tooltip';
+import {Tooltip} from '../shared-components/tooltip';
 import {bufferTime, delay, retryWhen} from 'rxjs/operators';
 
 import {Application, State, LogEntry} from './models';

@@ -1,4 +1,5 @@
 const path = require('path');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const groupKind = 'argoproj.io/ApplicationSet';
 const webpack = require('webpack');
@@ -15,9 +16,22 @@ const config = {
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.json', '.ttf', '.scss'],
     },
-    externals: {
-        react: 'React',
+    optimization: {
+        minimizer: [new TerserPlugin({
+            extractComments: false,
+        })],
     },
+    externals: [
+        {
+            react: 'React'
+        },
+        ({ request }, cb) => {
+            if (/.*\.(ttf|eot|woff|woff2|svg)(\?.*)?$/.test(request)) {
+                return cb(null, 'commonjs ' + request);
+            }
+            cb();
+        }
+    ],
     plugins: [
         new webpack.DefinePlugin({
             'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
@@ -45,7 +59,7 @@ const config = {
             {
                 test: /\.css$/,
                 use: ['style-loader', 'raw-loader'],
-            },
+            }
         ],
     },
 };

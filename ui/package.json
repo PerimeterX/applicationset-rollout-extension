@@ -7,7 +7,7 @@
     "react": "^16.9.3"
   },
   "scripts": {
-    "build": "NODE_ENV=production webpack --config webpack.config.js && tar -C dist -cvf dist/extension.tar resources"
+    "build": "rm -rf dist && NODE_ENV=production webpack --config webpack.config.js && tar -C dist -cvf dist/extension.tar resources"
   },
   "devDependencies": {
     "@types/react": "^16.8.5",
@@ -19,13 +19,14 @@
     "sass": "^1.34.1",
     "sass-loader": "^13.2.0",
     "style-loader": "^3.3.1",
+    "terser-webpack-plugin": "^5.3.14",
     "ts-loader": "9.4.2",
     "typescript": "^4.9.3",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.0"
   },
   "dependencies": {
-    "argo-ui": "git+https://github.com/argoproj/argo-ui.git",
+    "argo-ui": "^1.0.0",
     "deepmerge": "^3.2.0",
     "path": "^0.12.7",
     "react-moment": "^0.9.7",

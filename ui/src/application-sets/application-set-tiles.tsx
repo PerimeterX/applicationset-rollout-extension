@@ -5,7 +5,7 @@ import {DataLoader, Tooltip} from 'argo-ui';
 import classNames from 'classnames';
 
 import {ApplicationSet, ApplicationSource} from './models';
-import {Paginate} from '../paginate/paginate';
+import {Paginate} from '../shared-components/paginate/paginate';
 import {getApplication} from './service';
 import {ApplicationSetFlyout} from './application-set-flyout';
 import {NotificationBar, Notification} from './notification-bar';

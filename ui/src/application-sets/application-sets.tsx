@@ -1,12 +1,12 @@
 import * as React from 'react';
 
 import {DataLoader, Autocomplete} from 'argo-ui';
-import {Key, KeybindingContext, KeybindingProvider} from 'argo-ui/v2';
+import {Key, KeybindingContext, KeybindingProvider} from '../shared-components/keypress';
 
 import {ApplicationSet} from './models';
 import {ApplicationSetTiles} from './application-set-tiles';
 import {listApplicationSets} from './service';
-import {NavigationManager} from './navigation';
+import {NavigationManager} from '../shared-components/navigation';
 import {NotificationBar, Notification} from './notification-bar';
 import './application-sets.scss';
 
