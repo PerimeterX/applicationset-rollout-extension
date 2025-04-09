@@ -17,44 +17,14 @@
         justify-content: space-between;
         align-items: center;
         margin-left: 18px;
-        background-color: white;
-        border-bottom: 1px solid $argo-color-gray-2;
-
+        
         .favorites-toggle {
-            background: white;
-            border: 1px solid $argo-color-gray-4;
-            border-radius: 4px;
-            padding: 0.5em 1em;
-            cursor: pointer;
-            color: $argo-color-gray-6;
-            display: flex;
-            align-items: center;
-            gap: 0.5em;
-            font-size: 13px;
-            height: 32px;
-
-            i {
-                font-size: 14px;
-                color: $argo-color-gray-6;
-            }
-
-            &:hover {
-                background-color: $argo-color-gray-3;
-            }
-
+    
             &--active {
-                background-color: rgba($argo-color-teal-5, 0.1);
-                border-color: $argo-color-teal-5;
-                color: $argo-color-teal-5;
-
-                i {
-                    color: $argo-color-teal-5;
-                }
-
-                &:hover {
-                    background-color: rgba($argo-color-teal-5, 0.2);
-                }
+                background: $argo-color-teal-6;
+                color: $argo-status-warning-color !important;
             }
+
         }
     }
 

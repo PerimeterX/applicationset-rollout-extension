@@ -1,8 +1,8 @@
 import * as React from 'react';
-
 import {Key, KeybindingContext, KeybindingProvider} from '../shared-components/keypress';
 import {DataLoader} from '../shared-components/data-loader';
 import {Autocomplete} from '../shared-components/autocomplete';
+
 import {ApplicationSet} from './models';
 import {ApplicationSetTiles} from './application-set-tiles';
 import {listApplicationSets} from './service';
@@ -114,17 +114,14 @@ const SearchBar = ({content, appSets, onChange}: {content: string; appSets: Appl
 export const ApplicationSets = () => {
     const navigationManager = new NavigationManager();
     const urlParams = new URLSearchParams(navigationManager.history.location.search);
-    const [showFavoritesOnly, setShowFavoritesOnly] = React.useState(() => {
-        const stored = localStorage.getItem('application-sets.showFavoritesOnly');
-        return stored ? stored === 'true' : false;
-    });
+    const [showFavoritesOnly, setShowFavoritesOnly] = React.useState(urlParams.get('favorites') === 'true');
     const [applicationSets, setApplicationSets] = React.useState<ApplicationSet[]>([]);
     const [notification, setNotification] = React.useState<Notification | null>(null);
     const [search, setSearch] = React.useState(urlParams.get('search') || '');
 
     const toggleShowFavoritesOnly = (value: boolean) => {
         setShowFavoritesOnly(value);
-        localStorage.setItem('application-sets.showFavoritesOnly', value.toString());
+        navigationManager.goto('.', { search: search, favorites: value.toString() }, { replace: true });
     };
 
     const loadApplicationSets = async () => {
@@ -141,6 +138,8 @@ export const ApplicationSets = () => {
 
     React.useEffect(() => {
         loadApplicationSets();
+        const interval = setInterval(loadApplicationSets, 10000);
+        return () => clearInterval(interval);
     }, []);
 
     const filteredAppSets = (search: string) => {
@@ -161,9 +160,9 @@ export const ApplicationSets = () => {
                                     <div className='flex-top-bar__actions'>
                                         <div className='application-set-tiles__header'>
                                             <button
-                                                className={`favorites-toggle ${showFavoritesOnly ? 'favorites-toggle--active' : ''}`}
+                                                className={`argo-button argo-button--base-o favorites-toggle ${showFavoritesOnly ? 'favorites-toggle--active' : ''}`}
                                                 onClick={() => toggleShowFavoritesOnly(!showFavoritesOnly)}>
-                                                <i className='fa fa-star' /> Show Favorites
+                                                <i className='fa fa-star' />
                                             </button>
                                         </div>
                                         <SearchBar 
@@ -171,7 +170,7 @@ export const ApplicationSets = () => {
                                             appSets={applicationSets} 
                                             onChange={(value) => {
                                                 setSearch(value);
-                                                navigationManager.goto('.', {search: value}, {replace: true});
+                                                navigationManager.goto('.', {search: value, favorites: showFavoritesOnly.toString()}, {replace: true});
                                             }}
                                         />
                                     </div>

@@ -45,6 +45,13 @@ export function Paginate<T>({children, data, emptyState, preferencesKey, header,
         }
     }, [preferencesKey, pageSize, sortOption]);
 
+    useEffect(() => {
+        const pageCount = pageSize === -1 ? 1 : Math.ceil(data.length / pageSize);
+        if (pageCount > 0 && page >= pageCount) {
+            setPage(pageCount - 1);
+        }
+    }, [pageSize, data]);
+
     const pageCount = pageSize === -1 ? 1 : Math.ceil(data.length / pageSize);
 
     const handlePageSizeChange = (size: number) => {

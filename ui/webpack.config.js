@@ -24,12 +24,6 @@ const config = {
     externals: [
         {
             react: 'React'
-        },
-        ({ request }, cb) => {
-            if (/.*\.(ttf|eot|woff|woff2|svg)(\?.*)?$/.test(request)) {
-                return cb(null, 'commonjs ' + request);
-            }
-            cb();
         }
     ],
     plugins: [
