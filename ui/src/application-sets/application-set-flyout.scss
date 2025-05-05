@@ -1,0 +1,289 @@
+@import '../shared-components/config';
+
+.application-set-flyout {
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+
+    .application-set-header {
+        padding-bottom: 1em;
+        border-bottom: 1px solid $argo-color-gray-2;
+
+        .header-content {
+
+            .title {
+                font-size: 15px;
+            }
+
+            .selection-info {
+                margin-top: 0.8em;
+
+                .selection-links {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5em;
+                    font-size: 13px;
+
+                    &.label-selection {
+                        margin-top: 0.5em;
+
+                        .label-key {
+                            color: $argo-color-gray-6;
+                            min-width: 100px;
+                        }
+
+                        .label-values {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5em;
+                        }
+                    }
+
+                    .selection-link {
+                        color: $argo-color-teal-6;
+                        cursor: pointer;
+                        text-decoration: none;
+                        
+                        &:hover {
+                            text-decoration: underline;
+                        }
+                    }
+
+                    .separator {
+                        color: $argo-color-gray-4;
+                        margin: 0 0.5em;
+                        user-select: none;
+                    }
+                }
+            }
+        }
+    }
+
+    .loading-message {
+        text-align: center;
+        padding: 2em;
+        color: $argo-color-gray-6;
+        font-size: 0.9em;
+    }
+
+    .application-set-resources {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1em;
+        width: 100%;
+    }
+
+    .application-set-resource {
+        padding: 1em;
+        border-radius: 4px;
+        background-color: white;
+        border: 1px solid $argo-color-gray-4;
+        box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.1);
+        font-size: 0.8em;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+
+        &:hover {
+            border-color: $argo-color-teal-5;
+            box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.15);
+        }
+
+        &--selected {
+            background-color: rgba($argo-color-teal-5, 0.05);
+            border-color: $argo-color-teal-5;
+
+            &:before {
+                content: '';
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                width: 16px;
+                height: 16px;
+                background-color: $argo-color-teal-5;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            &:after {
+                content: '✓';
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                width: 16px;
+                height: 16px;
+                color: white;
+                font-size: 11px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        .title {
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 1em;
+            color: $argo-color-teal-6;
+            i {
+                margin-right: 0.5em;
+            }
+
+            a {
+                color: $argo-color-teal-6;
+                text-decoration: none;
+                
+                .fa-external-link-alt {
+                    display: none;
+                }
+                
+                &:hover {
+                    text-decoration: underline;
+                    
+                    .fa-external-link-alt {
+                        display: inline-block;
+                    }
+                }
+            }
+        }
+
+        .row {
+            display: flex;
+            margin-bottom: 0.8em;
+            line-height: 1.2em;
+
+            .label {
+                color: $argo-color-gray-6;
+                min-width: 100px;
+            }
+
+            .value {
+                flex: 1;
+                word-break: break-word;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+                
+                .label-pair {
+                    background-color: $argo-color-gray-3;
+                    color: $argo-color-gray-7;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-size: 11px;
+                    white-space: nowrap;
+                }
+
+                .status {
+                    display: inline-flex;
+                    align-items: center;
+                    margin-right: 8px;
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    line-height: 20px;
+                    height: 24px;
+
+                    i {
+                        margin-right: 4px;
+                        font-size: 14px;
+                    }
+
+                    &--healthy, &--synced {
+                        color: rgb(24, 190, 148);
+                        background-color: rgba(24, 190, 148, 0.1);
+                    }
+
+                    &--degraded {
+                        color: rgb(233, 109, 118);
+                        background-color: rgba(233, 109, 118, 0.1);
+                    }
+
+                    &--missing, &--outofsync, &--out-of-sync {
+                        color: $argo-status-warning-color;
+                        background-color: rgba($argo-status-warning-color, 0.1);
+                    }
+
+                    &--processing, &--progressing {
+                        color: rgb(13, 173, 234);
+                        background-color: rgba(13, 173, 234, 0.1);
+                    }
+
+                    &--suspended {
+                        color: rgb(118, 111, 148);
+                        background-color: rgba(118, 111, 148, 0.1);
+                    }
+
+                    &--unknown {
+                        color: rgb(204, 214, 221);
+                        background-color: rgba(204, 214, 221, 0.1);
+                    }
+                }
+            }
+        }
+
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .fa-play {
+            margin-right: 5px;
+        }
+    }
+}
+
+.rollout-actions {
+    position: relative;
+
+    &__menu {
+        min-width: 120px;
+        background: white;
+        border: 1px solid $argo-color-gray-4;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-radius: 3px;
+    }
+
+    &__item {
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 13px;
+        color: $argo-color-gray-6;
+        text-transform: capitalize;
+        border-bottom: 1px solid $argo-color-gray-3;
+        transition: all 0.2s ease;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &:hover {
+            background-color: $argo-color-gray-3;
+            color: $argo-color-teal-5;
+        }
+    }
+
+}
+
+.application-sets {
+
+    .rollout-action-main {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-right: none;
+    }
+
+    .rollout-action-caret {
+        border-left: none;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .top-caret {
+        margin-top: -1px;
+        border-left: 1px solid $argo-color-gray-4;
+    }
+}
