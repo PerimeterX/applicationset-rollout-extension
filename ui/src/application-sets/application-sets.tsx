@@ -179,6 +179,7 @@ export const ApplicationSets = () => {
                                 <ApplicationSetTiles 
                                     showFavoritesOnly={showFavoritesOnly}
                                     applicationSets={filteredAppSets(search)}
+                                    navigationManager={navigationManager}
                                 />
                             </>
                         )}
