@@ -10,11 +10,13 @@ import {Paginate} from '../shared-components/paginate/paginate';
 import {getApplication} from './service';
 import {ApplicationSetFlyout} from './application-set-flyout';
 import {NotificationBar, Notification} from '../shared-components/notification-bar/notification-bar';
+import {NavigationManager} from '../shared-components/navigation';
 import './application-set-tiles.scss';
 
 export interface ApplicationSetTilesProps {
     applicationSets: ApplicationSet[];
     showFavoritesOnly: boolean;
+    navigationManager: NavigationManager;
 }
 
 const getStatusInfo = (appSet: ApplicationSet) => {
@@ -111,12 +113,6 @@ const getTileStatusClass = (appSet: ApplicationSet) => {
     if (resources.some(r => r.health.status === 'Missing' || r.status === 'OutOfSync')) {
         return 'status--warning';
     }
-    if (resources.some(r => r.health.status === 'Processing')) {
-        return 'status--processing';
-    }
-    if (resources.some(r => r.health.status === 'Suspended')) {
-        return 'status--suspended';
-    }
     if (resources.some(r => r.health.status === 'Unknown' || r.status === 'Unknown')) {
         return 'status--unknown';
     }
@@ -134,11 +130,36 @@ const saveFavorites = (favorites: Set<string>) => {
     localStorage.setItem(FAVORITE_STORAGE_KEY, JSON.stringify(Array.from(favorites)));
 };
 
-export const ApplicationSetTiles = ({applicationSets, showFavoritesOnly}: ApplicationSetTilesProps) => {
+export const ApplicationSetTiles = ({applicationSets, showFavoritesOnly, navigationManager}: ApplicationSetTilesProps) => {
     const [favorites, setFavorites] = React.useState<Set<string>>(getFavorites());
     const [isRefreshing, setIsRefreshing] = React.useState<{[key: string]: boolean}>({});
     const [selectedAppSet, setSelectedAppSet] = React.useState<ApplicationSet | null>(null);
     const [notification, setNotification] = React.useState<Notification | null>(null);
+    const [isClearingSelection, setIsClearingSelection] = React.useState(false);
+
+    // Handle URL state for selectedAppSet
+    React.useEffect(() => {
+        const urlParams = new URLSearchParams(navigationManager.history.location.search);
+        const currentParams = Object.fromEntries(urlParams.entries());
+        const selectedAppSetName = urlParams.get('selected');
+
+        // Only initialize from URL if we don't have a selected app set and we're not intentionally clearing it
+        if (!selectedAppSet && selectedAppSetName && !isClearingSelection) {
+            const appSet = applicationSets.find(app => app.metadata.name === selectedAppSetName);
+            if (appSet) {
+                setSelectedAppSet(appSet);
+            }
+        } 
+        // Only update URL if we have a selected app set or if we're explicitly clearing it
+        else if (selectedAppSet || currentParams.selected) {
+            if (selectedAppSet) {
+                currentParams.selected = selectedAppSet.metadata.name;
+            } else {
+                currentParams.selected = '';
+            }
+            navigationManager.goto('.', currentParams, {replace: true});
+        }
+    }, [selectedAppSet, applicationSets, isClearingSelection]);
 
     const refreshApplications = async (appSet: ApplicationSet) => {
         if (!appSet.status?.resources) {
@@ -367,7 +388,12 @@ export const ApplicationSetTiles = ({applicationSets, showFavoritesOnly}: Applic
             <ApplicationSetFlyout
                 show={selectedAppSet !== null}
                 appSet={selectedAppSet}
-                onClose={() => setSelectedAppSet(null)}
+                onClose={() => {
+                    setIsClearingSelection(true);
+                    setSelectedAppSet(null);
+                    // Reset the flag after a short delay to allow the URL update to complete
+                    setTimeout(() => setIsClearingSelection(false), 100);
+                }}
             />
             {notification && (
                 <NotificationBar

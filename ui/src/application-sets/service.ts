@@ -1,6 +1,6 @@
 import * as deepMerge from 'deepmerge';
 import requests from '../requests/requests';
-import { ApplicationSet, Resource, Application } from './models';
+import { ApplicationSet, Resource, Application, Rollout, ResourceTree } from './models';
 
 export function listApplicationSets(): Promise<ApplicationSet[]> {
     return requests.get('/applicationsets').then(res => res.body.items || []);
@@ -43,6 +43,17 @@ export function getApplication(name: string, appNamespace: string, refresh?: 'no
         .get(`/applications/${name}`)
         .query(query)
         .then(res => parseAppFields(res.body));
+}
+
+export function getResourceTree(name: string, appNamespace: string): Promise<ResourceTree> {
+    const query: {[key: string]: string} = {};
+    if (appNamespace) {
+        query.appNamespace = appNamespace;
+    }
+    return requests
+        .get(`/applications/${name}/resource-tree`)
+        .query(query)
+        .then(res => res.body as ResourceTree);
 }
 
 function parseAppFields(data: any): Application {
