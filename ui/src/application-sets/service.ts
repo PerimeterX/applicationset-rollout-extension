@@ -1,6 +1,6 @@
 import * as deepMerge from 'deepmerge';
 import requests from '../requests/requests';
-import { ApplicationSet, Resource, Application, Rollout, ResourceTree } from './models';
+import {ApplicationSet, Resource, Application, ResourceTree} from './models';
 
 export function listApplicationSets(): Promise<ApplicationSet[]> {
     return requests.get('/applicationsets').then(res => res.body.items || []);
