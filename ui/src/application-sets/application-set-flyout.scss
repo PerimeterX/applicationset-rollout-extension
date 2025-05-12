@@ -11,10 +11,13 @@
         border-bottom: 1px solid $argo-color-gray-2;
 
         .header-content {
-            display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
+
+            .header-top {
+                display: flex;
+            }
 
             .title {
                 font-size: 15px;

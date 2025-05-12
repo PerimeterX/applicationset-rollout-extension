@@ -513,75 +513,78 @@ export const ApplicationSetFlyout = ({ show, appSet, onClose }: ApplicationSetFl
             <div className='application-set-flyout'>
                 <div className='application-set-header'>
                     <div className='header-content'>
-                        <div className='title'>
-                            {appSet?.metadata?.name}
-                        </div>
-                        {!loading &&appSet && totalApps > 0 && (() => {
-                            const pausedRollouts = appSet.status.resources.filter(resource => {
-                                const appResource = applications[`${resource.namespace}/${resource.name}`];
-                                return appResource?.application && isRolloutSuspended(appResource.application);
-                            }).length;
+                        <div className='header-top'>
+                            <div className='title'>
+                                {appSet?.metadata?.name}
+                            </div>
+                            {!loading &&appSet && totalApps > 0 && (() => {
+                                const pausedRollouts = appSet.status.resources.filter(resource => {
+                                    const appResource = applications[`${resource.namespace}/${resource.name}`];
+                                    return appResource?.application && isRolloutSuspended(appResource.application);
+                                }).length;
 
-                            const processingRollouts = appSet.status.resources.filter(resource => {
-                                const appResource = applications[`${resource.namespace}/${resource.name}`];
-                                if (!appResource?.application) return false;
-                                const state = getRolloutState(appResource.application, appResource.resourceTree);
-                                return state?.status === 'Processing' || state?.status === 'Progressing';
-                            });
+                                const processingRollouts = appSet.status.resources.filter(resource => {
+                                    const appResource = applications[`${resource.namespace}/${resource.name}`];
+                                    if (!appResource?.application) return false;
+                                    const state = getRolloutState(appResource.application, appResource.resourceTree);
+                                    return state?.status === 'Processing' || state?.status === 'Progressing';
+                                });
 
-                            const totalProgress = processingRollouts.reduce((sum, resource) => {
-                                const appResource = applications[`${resource.namespace}/${resource.name}`];
-                                const state = getRolloutState(appResource.application, appResource.resourceTree);
-                                return {
-                                    updatedPods: sum.updatedPods + state?.updatedPods || 0,
-                                    totalPods: sum.totalPods + state?.totalPods || 0
-                                };
-                            }, {updatedPods: 0, totalPods: 0});
+                                const totalProgress = processingRollouts.reduce((sum, resource) => {
+                                    const appResource = applications[`${resource.namespace}/${resource.name}`];
+                                    const state = getRolloutState(appResource.application, appResource.resourceTree);
+                                    return {
+                                        updatedPods: sum.updatedPods + state?.updatedPods || 0,
+                                        totalPods: sum.totalPods + state?.totalPods || 0
+                                    };
+                                }, {updatedPods: 0, totalPods: 0});
 
-                            const ratio = totalProgress.updatedPods && totalProgress.totalPods ? totalProgress.updatedPods / totalProgress.totalPods : 0;
+                                const ratio = totalProgress.updatedPods && totalProgress.totalPods ? totalProgress.updatedPods / totalProgress.totalPods : 0;
 
-                            if (pausedRollouts === 0 && processingRollouts.length === 0) {
-                                return null;
-                            }
+                                if (pausedRollouts === 0 && processingRollouts.length === 0) {
+                                    return null;
+                                }
 
-                            return (
-                                <div className='rollout-summary'>
-                                    <div className='rollout-summary-content'>
-                                        {pausedRollouts > 0 && (
-                                            <div className='summary-item'>
-                                                <span className='label'>
-                                                    <i className='fa fa-pause-circle' />
-                                                    Paused Rollouts
-                                                </span>
-                                                <span className='value'>
-                                                    <span className='status-badge paused'>
-                                                        {pausedRollouts}
+                                return (
+                                    <div className='rollout-summary'>
+                                        <div className='rollout-summary-content'>
+                                            {pausedRollouts > 0 && (
+                                                <div className='summary-item'>
+                                                    <span className='label'>
+                                                        <i className='fa fa-pause-circle' />
+                                                        Paused Rollouts
                                                     </span>
-                                                </span>
-                                            </div>
-                                        )}
-                                        {processingRollouts.length > 0 && (
-                                            <div className='summary-item'>
-                                                <span className='label'>
-                                                    <i className='fa fa-circle-notch fa-spin' />
-                                                    Processing Rollouts
-                                                </span>
-                                                <span className='value'>
-                                                    <span className='status-badge processing'>
-                                                        {processingRollouts.length}
-                                                    </span>
-                                                    <Tooltip content={`${totalProgress.updatedPods} / ${totalProgress.totalPods} pods updated`}>
-                                                        <span className='progress-percentage'>
-                                                            ({Math.round(ratio * 100)}%)
+                                                    <span className='value'>
+                                                        <span className='status-badge paused'>
+                                                            {pausedRollouts}
                                                         </span>
-                                                    </Tooltip>
-                                                </span>
-                                            </div>
-                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            {processingRollouts.length > 0 && (
+                                                <div className='summary-item'>
+                                                    <span className='label'>
+                                                        <i className='fa fa-circle-notch fa-spin' />
+                                                        Processing Rollouts
+                                                    </span>
+                                                    <span className='value'>
+                                                        <span className='status-badge processing'>
+                                                            {processingRollouts.length}
+                                                        </span>
+                                                        <Tooltip content={`${totalProgress.updatedPods} / ${totalProgress.totalPods} pods updated`}>
+                                                            <span className='progress-percentage'>
+                                                                ({Math.round(ratio * 100)}%)
+                                                            </span>
+                                                        </Tooltip>
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })()}
+                                );
+                            })()}
+
+                        </div>
                         
                         {!loading &&appSet && totalApps > 0 && (
                             <div className='selection-info'>
