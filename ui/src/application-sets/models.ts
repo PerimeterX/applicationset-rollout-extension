@@ -44,6 +44,8 @@ export interface Application {
         destination: {
             name: string;
         };
+        source: ApplicationSource;
+        sources: ApplicationSource[];
     };
     status: {
         resources: ResourceStatus[];
@@ -54,7 +56,24 @@ export interface Application {
         operationState?: {
             finishedAt: string;
         };
+        history: RevisionHistory[];
     };
+}
+
+export interface RevisionHistory {
+    id: number;
+    revision: string;
+    source: ApplicationSource;
+    revisions: string[];
+    sources: ApplicationSource[];
+    deployStartedAt: string;
+    deployedAt: string;
+    initiatedBy: OperationInitiator;
+}
+
+export interface OperationInitiator {
+    username: string;
+    automated: boolean;
 }
 
 export interface ApplicationSource {
@@ -196,5 +215,5 @@ export interface SystemInfo {
 
 export interface ApplicationResource {
     application: Application;
-    resourceTree: ResourceTree;
+    resourceTree?: ResourceTree;
 }

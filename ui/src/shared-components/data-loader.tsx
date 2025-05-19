@@ -83,6 +83,7 @@ export class DataLoader<D = {}, I = undefined> extends React.Component<LoaderPro
                     message={this.state.notification.message}
                     type={this.state.notification.type}
                     onClose={() => this.setState({notification: null})}
+                    requireApproval={this.state.notification.requireApproval}
                 />
             )}
         </>;

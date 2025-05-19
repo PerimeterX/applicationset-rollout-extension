@@ -1,0 +1,88 @@
+@import '../shared-components/config';
+
+.rollback-flyout {
+    padding: 0;
+
+    &__entry {
+        border-radius: 6px;
+        margin-bottom: 12px;
+        border: 1px solid $argo-color-gray-3;
+    }
+
+    &__entry-info {
+        flex: 0 0 320px;
+        padding: 16px;
+        background: $argo-color-gray-3;
+        border-top-left-radius: 6px;
+        border-bottom-left-radius: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        position: relative;
+    }
+
+    &__rollback-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.15s;
+        z-index: 2;
+        &:hover {
+            background: $argo-color-gray-4;
+        }
+        i.fa-undo {
+            color: $argo-color-teal-5;
+            font-size: 18px;
+        }
+    }
+
+    &__row {
+        color: $argo-color-gray-7;
+        font-size: 15px;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    &__value {
+        font-weight: 400;
+        font-size: 13px;
+        margin-left: 4px;
+        color: $argo-color-gray-8;
+    }
+}
+
+.rollback-flyout__row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.rollback-flyout__icon {
+    width: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.rollback-flyout__label {
+    width: 120px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.rollback-flyout__value {
+    flex: 1;
+    word-break: break-all;
+} 
