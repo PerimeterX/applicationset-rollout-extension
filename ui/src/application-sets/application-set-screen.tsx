@@ -33,9 +33,6 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
     };
 
     const isRolloutDegraded = (app: Application) => {
-        if (app.metadata.name === 'bouncer-async-us-central1') {
-            return true;
-        }
         return isRolloutInStatus(app, 'Degraded');
     };
 
@@ -132,9 +129,7 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
     const handleRolloutActionAll = async (action: string) => {
         setIsInAction(true);
         setLoading(true);
-        const apps = Array.from(selectedApps)
-            .map(appKey => applications[appKey]?.application)
-            .filter((app): app is Application => !!app && isRolloutSuspended(app));
+        const apps = Array.from(selectedApps).map(appKey => applications[appKey]?.application);
         
         setFetchProgress({completed: 0, total: apps.length});
 
