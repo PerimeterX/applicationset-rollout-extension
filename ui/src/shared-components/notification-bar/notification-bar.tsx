@@ -5,21 +5,25 @@ export interface NotificationBarProps {
     message: string;
     type: 'success' | 'error';
     onClose: () => void;
+    requireApproval?: boolean;
 }
 
 export interface Notification {
     message: string;
     type: 'success' | 'error';
+    requireApproval?: boolean;
 }
 
-export const NotificationBar: React.FC<NotificationBarProps> = ({ message, type, onClose }) => {
+export const NotificationBar: React.FC<NotificationBarProps> = ({ message, type, onClose, requireApproval }) => {
     React.useEffect(() => {
-        const timer = setTimeout(() => {
-            onClose();
-        }, 5000);
+        if (!requireApproval) {
+            const timer = setTimeout(() => {
+                onClose();
+            }, 5000);
 
-        return () => clearTimeout(timer);
-    }, [onClose]);
+            return () => clearTimeout(timer);
+        }
+    }, [onClose, requireApproval]);
 
     return (
         <div className={`notification-bar notification-bar--${type}`}>
