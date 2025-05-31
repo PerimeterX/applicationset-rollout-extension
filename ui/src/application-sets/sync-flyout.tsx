@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { SlidingPanel } from '../shared-components/sliding-panel/sliding-panel';
-import { Application } from './models';
+import { Application } from '../models/application-set-models';
 import './sync-flyout.scss';
 
 export interface SyncOptions {

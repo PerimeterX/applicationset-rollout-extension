@@ -30,12 +30,24 @@ function toAbsURL(val: string): string {
     return path.join(baseHRef, val);
 }
 
-function apiRoot(): string {
+function apiRoot(absoluteUrl: boolean): string {
+    if (absoluteUrl) {
+        return '';
+    }
     return toAbsURL('/api/v1');
 }
 
 function initHandlers(req: agent.Request) {
-    req.on('error', err => onError.next(err));
+    req.on('error', err => {
+        if (err && err.response && err.response.body) {
+            err.message = err.message + (typeof err.response.body === 'string' ? (': ' + err.response.body) : (': ' + JSON.stringify(err.response.body)));
+            err.body = err.response.body;
+        }
+        if (err && err.response && err.response.text) {
+            err.message = err.message + (': ' + err.response.text);
+        }
+        onError.next(err);
+    });
     return req;
 }
 
@@ -46,29 +58,33 @@ export default {
     agent,
     toAbsURL,
     onError: onError.asObservable().pipe(filter(err => err != null)),
-    get(url: string) {
-        return initHandlers(agent.get(`${apiRoot()}${url}`));
+    get(url: string, absoluteUrl = false) {
+        return initHandlers(agent.get(`${apiRoot(absoluteUrl)}${url}`));
     },
 
-    post(url: string) {
-        return initHandlers(agent.post(`${apiRoot()}${url}`)).set('Content-Type', 'application/json');
+    post(url: string, absoluteUrl = false) {
+        return initHandlers(agent.post(`${apiRoot(absoluteUrl)}${url}`)).set('Content-Type', 'application/json');
     },
 
-    put(url: string) {
-        return initHandlers(agent.put(`${apiRoot()}${url}`)).set('Content-Type', 'application/json');
+    postFormData(url: string, formData: FormData, absoluteUrl = false) {
+        return initHandlers(agent.post(`${apiRoot(absoluteUrl)}${url}`)).send(formData);
     },
 
-    patch(url: string) {
-        return initHandlers(agent.patch(`${apiRoot()}${url}`)).set('Content-Type', 'application/json');
+    put(url: string, absoluteUrl = false) {
+        return initHandlers(agent.put(`${apiRoot(absoluteUrl)}${url}`)).set('Content-Type', 'application/json');
     },
 
-    delete(url: string) {
-        return initHandlers(agent.del(`${apiRoot()}${url}`)).set('Content-Type', 'application/json');
+    patch(url: string, absoluteUrl = false) {
+        return initHandlers(agent.patch(`${apiRoot(absoluteUrl)}${url}`)).set('Content-Type', 'application/json');
     },
 
-    loadEventSource(url: string): Observable<string> {
+    delete(url: string, absoluteUrl = false) {
+        return initHandlers(agent.del(`${apiRoot(absoluteUrl)}${url}`)).set('Content-Type', 'application/json');
+    },
+
+    loadEventSource(url: string, absoluteUrl = false): Observable<string> {
         return Observable.create((observer: Observer<any>) => {
-            let eventSource = new EventSource(`${apiRoot()}${url}`);
+            let eventSource = new EventSource(`${apiRoot(absoluteUrl)}${url}`);
             eventSource.onmessage = msg => observer.next(msg.data);
             eventSource.onerror = e => () => {
                 observer.error(e);

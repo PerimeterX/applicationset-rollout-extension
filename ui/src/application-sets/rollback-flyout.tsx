@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { SlidingPanel } from '../shared-components/sliding-panel/sliding-panel';
-import { Application, RevisionHistory } from './models';
-import { rollback } from './service';
+import { Application, RevisionHistory } from '../models/application-set-models';
+import { rollback } from '../service/application-set-service';
 import './rollback-flyout.scss';
 
 export interface RollbackFlyoutProps {

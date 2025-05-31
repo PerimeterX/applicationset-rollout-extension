@@ -2,120 +2,19 @@ import * as React from 'react';
 import * as moment from 'moment';
 import classNames from 'classnames';
 
-import {Key, KeybindingContext, KeybindingProvider} from '../shared-components/keypress';
+import {KeybindingProvider} from '../shared-components/keypress';
 import {DataLoader} from '../shared-components/data-loader';
-import {Autocomplete} from '../shared-components/autocomplete';
-import {ApplicationSet, ApplicationSource} from './models';
-import {listApplicationSets} from './service';
+import {ApplicationSet, ApplicationSource} from '../models/application-set-models';
+import {listApplicationSets} from '../service/application-set-service';
 import {Tooltip} from '../shared-components/tooltip';
 import {Paginate} from '../shared-components/paginate/paginate';
-import {getApplication} from './service';
+import {getApplication} from '../service/application-set-service';
 import {ApplicationSetScreen} from './application-set-screen';
 import {NotificationBar, Notification} from '../shared-components/notification-bar/notification-bar';
 import {NavigationManager} from '../shared-components/navigation';
+import {SearchBar} from '../shared-components/search-bar';
 
 import './application-sets.scss';
-
-interface AutocompleteItem {
-    value: string;
-    label: string;
-}
-
-const SearchBar = ({content, appSets, onChange}: {content: string; appSets: ApplicationSet[]; onChange: (value: string) => void}) => {
-    const searchBar = React.useRef<HTMLDivElement>(null);
-    const {useKeybinding} = React.useContext(KeybindingContext);
-    const [isFocused, setFocus] = React.useState(false);
-
-    useKeybinding({
-        keys: Key.SLASH,
-        action: () => {
-            if (searchBar.current) {
-                searchBar.current.querySelector('input').focus();
-                setFocus(true);
-                return true;
-            }
-            return false;
-        }
-    });
-
-    useKeybinding({
-        keys: Key.ESCAPE,
-        action: () => {
-            if (searchBar.current && isFocused) {
-                searchBar.current.querySelector('input').blur();
-                setFocus(false);
-                return true;
-            }
-            return false;
-        }
-    });
-
-    return (
-        <Autocomplete
-            filterSuggestions={true}
-            renderInput={inputProps => (
-                <div className='applications-list__search' ref={searchBar}>
-                    <i 
-                        className='fa fa-search' 
-                        style={{marginRight: '9px', cursor: 'pointer'}}
-                        onClick={() => {
-                            if (searchBar.current) {
-                                searchBar.current.querySelector('input').focus();
-                            }
-                        }}
-                    />
-                    <input
-                        {...inputProps}
-                        className='argo-field'
-                        placeholder='Search application sets...'
-                        onFocus={e => {
-                            e.target.select();
-                            if (inputProps.onFocus) {
-                                inputProps.onFocus(e);
-                            }
-                            setFocus(true);
-                        }}
-                        onBlur={e => {
-                            setFocus(false);
-                            if (inputProps.onBlur) {
-                                inputProps.onBlur(e);
-                            }
-                        }}
-                        onKeyUp={e => {
-                            if (e.key === 'Enter') {
-                                e.preventDefault();
-                                const value = (e.target as HTMLInputElement).value;
-                                onChange(value);
-                                (e.target as HTMLInputElement).blur();
-                            }
-                        }}
-                    />
-                    <div className='keyboard-hint'>/</div>
-                    {content && (
-                        <i className='fa fa-times' onClick={() => onChange('')} style={{cursor: 'pointer', marginLeft: '5px'}} />
-                    )}
-                </div>
-            )}
-            wrapperProps={{className: 'applications-list__search-wrapper'}}
-            renderItem={(item: AutocompleteItem) => (
-                <React.Fragment>
-                    <i className='icon fa fa-code-branch' /> {item.label}
-                </React.Fragment>
-            )}
-            onSelect={(value: string, item: AutocompleteItem) => {
-                onChange(item.value);
-            }}
-            onChange={e => {
-                onChange(e.target.value);
-            }}
-            value={content || ''}
-            items={appSets.map(appSet => ({
-                value: appSet.metadata.name,
-                label: appSet.metadata.name
-            }))}
-        />
-    );
-};
 
 const getStatusInfo = (appSet: ApplicationSet) => {
     const resources = appSet.status?.resources || [];
@@ -260,7 +159,7 @@ export const ApplicationSets = () => {
 
     React.useEffect(() => {
         loadApplicationSets();
-        const interval = setInterval(loadApplicationSets, 10000);
+        const interval = setInterval(loadApplicationSets, 60 * 1000);
         return () => clearInterval(interval);
     }, []);
 
@@ -526,7 +425,7 @@ export const ApplicationSets = () => {
                                                 </div>
                                                 <SearchBar 
                                                     content={search} 
-                                                    appSets={applicationSets} 
+                                                    values={applicationSets.map(appSet => appSet.metadata.name)} 
                                                     onChange={(value) => {
                                                         setSearch(value);
                                                         navigationManager.goto('.', {search: value, favorites: showFavoritesOnly.toString()}, {replace: true});

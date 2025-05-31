@@ -1,0 +1,326 @@
+@import '../shared-components/config';
+
+.debug-pods {
+    &-list {
+        padding: 1em;
+        
+        .argo-table-list {
+            &__row {
+                padding-left: 1em;
+                padding-right: 1em;
+                border-left: 0;
+                border-right: 0;
+                
+                .columns {
+                    padding-left: 1em;
+                    padding-right: 1em;
+                }
+            }
+        }
+    }
+} 
+
+.debug-pods__list {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fill,minmax(370px,1fr));
+    padding: 0 12px;
+
+    &__wrapper {
+        padding: 1em;
+        margin: 0;
+        width: 100%;
+    }
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-left: 18px;
+        
+        .favorites-toggle {
+    
+            &--active {
+                background: $argo-color-teal-6;
+                color: $argo-status-warning-color !important;
+            }
+
+        }
+    }
+
+    &__item {
+        background-color: white;
+        border-radius: 4px;
+        box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.1);
+        margin: 0.5em;
+        padding: 1.7em;
+        font-size: 0.8em;
+        border-left: 4px solid transparent;
+        position: relative;
+
+        .title {
+            margin-bottom: 1em;
+            
+            .fa {
+                margin-right: 1em;
+            }
+        }
+
+        &:hover {
+            box-shadow: 1px 2px 3px rgba($argo-color-gray-9, 0.1), 0 0 0 1px rgba($argo-color-teal-5, 0.5);
+        }
+
+        // Status-based border colors in order of precedence
+        &.status--degraded {
+            border-left-color: rgb(233, 109, 118);
+        }
+
+        &.status--warning {
+            border-left-color: rgb(244, 192, 48);
+        }
+
+        &.status--processing {
+            border-left-color: rgb(13, 173, 234);
+        }
+
+        &.status--suspended {
+            border-left-color: rgb(118, 111, 148);
+        }
+
+        &.status--unknown {
+            border-left-color: rgb(204, 214, 221);
+        }
+
+        &.status--healthy {
+            border-left-color: rgb(24, 190, 148);
+        }
+
+        .favorite-button {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25em;
+            color: $argo-color-gray-5;
+            font-size: 16px;
+            z-index: 1;
+
+            &:hover {
+                color: $argo-color-teal-5;
+            }
+
+            &--active {
+                color: $argo-color-teal-5;
+
+                .fa-star {
+                    color: rgb(244, 192, 48);
+                }
+            }
+        }
+
+        .title {
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 0.75em;
+            display: flex;
+            align-items: center;
+            gap: 0.25em;
+
+            .fa-code-branch {
+                color: $argo-color-gray-6;
+                margin-right: 0.25em;
+            }
+        }
+
+        .row {
+            display: flex;
+            margin: 0.4em 0;
+            align-items: flex-start;
+
+            .label {
+                width: 120px;
+                text-align: left;
+                padding-right: 0.5em;
+                flex-shrink: 0;
+            }
+
+            .value {
+                flex: 1;
+                padding: 0 10px;
+                word-break: break-word;
+
+                a {
+                    color: $argo-color-teal-6;
+                    text-decoration: none;
+                    
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
+
+                .value-label {
+                    background-color: $argo-color-gray-2;
+                    border-radius: 4px;
+                    padding: 2px 8px;
+                    display: inline-block;
+                }
+
+                .status {
+                    display: inline-flex;
+                    align-items: center;
+                    margin-right: 8px;
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    font-size: 12px;
+
+                    i {
+                        margin-right: 4px;
+                    }
+
+                    &--healthy, &--synced {
+                        color: rgb(24, 190, 148);
+                        background-color: rgba(24, 190, 148, 0.1);
+                    }
+
+                    &--degraded {
+                        color: rgb(233, 109, 118);
+                        background-color: rgba(233, 109, 118, 0.1);
+                    }
+
+                    &--missing, &--out-of-sync {
+                        color: rgb(244, 192, 48);
+                        background-color: rgba(244, 192, 48, 0.1);
+                    }
+
+                    &--processing {
+                        color: rgb(13, 173, 234);
+                        background-color: rgba(13, 173, 234, 0.1);
+                    }
+
+                    &--suspended {
+                        color: rgb(118, 111, 148);
+                        background-color: rgba(118, 111, 148, 0.1);
+                    }
+
+                    &--unknown {
+                        color: rgb(204, 214, 221);
+                        background-color: rgba(204, 214, 221, 0.1);
+                    }
+                }
+            }
+        }
+    }
+
+    &__selected {
+        background-color: $argo-color-gray-3;
+    }
+
+    .actions {
+        margin-top: 1.5em;
+
+        i {
+            margin-right: 0.5em;
+        }
+    }
+}
+
+.debug-pods__list {
+    &__entry {
+        padding: 1em;
+        border: 1px solid $argo-color-gray-4;
+        margin-bottom: 1em;
+        border-radius: 4px;
+        transition: all 0.2s ease-in-out;
+
+        &:hover {
+            border-color: $argo-color-teal-5;
+        }
+    }
+
+    &__title {
+        font-size: 1.2em;
+        font-weight: 500;
+        margin-bottom: 0.5em;
+        color: $argo-color-teal-5;
+    }
+
+    &__info {
+        .row {
+            margin: 0.5em 0;
+        }
+    }
+}
+
+// Pod phase status styles
+.status.status--pending, .status.status--waiting {
+    color: $argo-status-warning-color;
+    background: rgba($argo-status-warning-color, 0.1);
+}
+.status.status--running {
+    color: $argo-success-color;
+    background: rgba($argo-success-color, 0.1);
+}
+.status.status--succeeded, .status.status--running {
+    color: $argo-success-color;
+    background: rgba($argo-success-color, 0.1);
+}
+.status.status--failed, .status.status--terminated {
+    color: $argo-failed-color;
+    background: rgba($argo-failed-color, 0.1);
+}
+.status.status--unknown {
+    color: $argo-color-gray-4;
+    background: rgba($argo-color-gray-4, 0.1);
+}
+.status.status--terminating {
+    color: $argo-color-gray-6;
+    background: $argo-color-gray-2;
+}
+
+.debug-pods__list__item {
+    border-left: 4px solid transparent;
+
+    &.status--pending {
+        border-left-color: $argo-status-warning-color;
+    }
+    &.status--running,
+    &.status--succeeded {
+        border-left-color: $argo-success-color;
+    }
+    &.status--failed {
+        border-left-color: $argo-failed-color;
+    }
+    &.status--unknown,
+    &.status--terminating {
+        border-left-color: $argo-color-gray-4;
+    }
+}
+
+.value-label.label {
+    margin: 2px;
+}
+
+.debug-pod-flyout__header {
+    display: flex;
+    align-items: center;
+
+    .icon {
+        margin-right: 15px;
+        font-size: 24px;
+        color: $argo-color-gray-5;
+    }
+    .title {
+        font-size: 22px;
+        color: $argo-color-gray-8;
+        line-height: 1;
+    }
+}
+
+.resource-details__header {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 1em;
+}

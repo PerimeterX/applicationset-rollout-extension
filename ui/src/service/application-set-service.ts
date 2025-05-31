@@ -1,30 +1,12 @@
 import * as deepMerge from 'deepmerge';
-import requests from '../requests/requests';
-import {ApplicationSet, Resource, Application, ResourceTree} from './models';
+import requests from './requests';
+import {callWithRetries, call} from './call';
+import {ApplicationSet, Resource, Application, ResourceTree} from '../models/application-set-models';
 
-const MAX_RETRIES = 3;
-
-function isUnauthorizedError(error: any): boolean {
-    return error?.status === 401 || error?.response?.status === 401;
-}
-
-async function withRetry<T>(fn: () => Promise<T>, retries = MAX_RETRIES): Promise<T> {
-    try {
-        return await fn();
-    } catch (error) {
-        if (isUnauthorizedError(error)) {
-            window.location.href = '/applications';
-            throw error;
-        }
-        if (retries > 0) {
-            return withRetry(fn, retries - 1);
-        }
-        throw error;
-    }
-}
+const RETRIES = 3;
 
 export function listApplicationSets(): Promise<ApplicationSet[]> {
-    return withRetry(() => 
+    return call(() => 
         requests.get('/applicationsets').then(res => res.body.items || [])
     );
 }
@@ -36,7 +18,7 @@ export function syncApplication(
     prune: boolean,
     dryRun: boolean,
 ): Promise<boolean> {
-    return withRetry(() =>
+    return callWithRetries(RETRIES, () =>
         requests
             .post(`/applications/${name}/sync`)
             .send({
@@ -50,14 +32,16 @@ export function syncApplication(
 }
 
 export function rollback(name: string, appNamespace: string, id: number): Promise<boolean> {
-    return requests
-        .post(`/applications/${name}/rollback`)
-        .send({id, appNamespace})
-        .then(() => true);
+    return callWithRetries(RETRIES, () => 
+        requests
+            .post(`/applications/${name}/rollback`)
+            .send({id, appNamespace})
+            .then(() => true)
+    );
 }
 
 export function runResourceAction(name: string, appNamespace: string, resource: Resource, action: string): Promise<any> {
-    return withRetry(() =>
+    return callWithRetries(RETRIES, () =>
         requests
             .post(`/applications/${name}/resource/actions`)
             .query({
@@ -81,7 +65,7 @@ export function getApplication(name: string, appNamespace: string, refresh?: 'no
     if (appNamespace) {
         query.appNamespace = appNamespace;
     }
-    return withRetry(() =>
+    return callWithRetries(RETRIES, () =>
         requests
             .get(`/applications/${name}`)
             .query(query)
@@ -94,7 +78,7 @@ export function getResourceTree(name: string, appNamespace: string): Promise<Res
     if (appNamespace) {
         query.appNamespace = appNamespace;
     }
-    return withRetry(() =>
+    return callWithRetries(RETRIES, () =>
         requests
             .get(`/applications/${name}/resource-tree`)
             .query(query)

@@ -1,0 +1,18 @@
+@import '../shared-components/config';
+
+.debug-pod-manifest {
+
+    &__manifest-title {
+        background: $white-color;
+        padding: 21px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    &__manifest-title-text {
+        color: $argo-color-teal-6;
+        font-size: 13px;
+        text-transform: uppercase;
+        font-weight: 500;
+    }
+}
