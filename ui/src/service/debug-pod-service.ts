@@ -6,19 +6,19 @@ import {LogEntry} from '../models/log-models';
 import {Event} from '../models/event-models';
 
 export function getDebugPods(): Promise<DebugPod[]> {
-    return call(() => requests.get('http://localhost:8223/debug_pods', true).then(res => res.body));
+    return call(() => requests.get('/extensions/debugpods/debug_pods', true).then(res => res.body));
 }
 
-export function createDebugPod(cluster: string, pod: Pod): Promise<DebugPod> {
-    return call(() => requests.post('http://localhost:8223/debug_pod', true).send({cluster, pod}).then(res => res.body));
+export function createDebugPod(cluster: string, originalPodName: string, applicationName: string, pod: Pod): Promise<DebugPod> {
+    return call(() => requests.post('/extensions/debugpods/debug_pod', true).send({cluster, originalPodName, applicationName, pod}).then(res => res.body));
 }
 
 export function deleteDebugPod(cluster: string, pod: string): Promise<void> {
-    return call(() => requests.delete('http://localhost:8223/debug_pod', true).send({cluster, pod}));
+    return call(() => requests.delete('/extensions/debugpods/debug_pod', true).send({cluster, pod}));
 }
 
 export function getContainerLogs(cluster: string, namespace, pod: string, container: string): Observable<LogEntry> {
-    const entries = requests.loadEventSource(`http://localhost:8223/logs?container=${container}&namespace=${namespace}&pod=${pod}&cluster=${cluster}`, true).pipe(map(content => ({content}) as LogEntry));
+    const entries = requests.loadEventSource(`/extensions/debugpods/logs?container=${container}&namespace=${namespace}&pod=${pod}&cluster=${cluster}`, true).pipe(map(content => ({content}) as LogEntry));
     let first = true;
     return new Observable(observer => {
         const subscription = entries.subscribe(
@@ -46,7 +46,7 @@ export function getContainerLogs(cluster: string, namespace, pod: string, contai
 }
 
 export function getPodEvents(cluster: string, namespace: string, pod: string): Observable<Event> {
-    const entries = requests.loadEventSource(`http://localhost:8223/events?namespace=${namespace}&pod=${pod}&cluster=${cluster}`, true).pipe(map(data => JSON.parse(data) as Event));
+    const entries = requests.loadEventSource(`/extensions/debugpods/events?namespace=${namespace}&pod=${pod}&cluster=${cluster}`, true).pipe(map(data => JSON.parse(data) as Event));
     return new Observable(observer => {
         const subscription = entries.subscribe(
             entry => {
@@ -110,7 +110,7 @@ export function copyFiles(
     formData.append('destination', destination);
 
     return call(() => 
-        requests.postFormData('http://localhost:8223/copy_files', formData, true)
+        requests.postFormData('/extensions/debugpods/copy_files', formData, true)
             .then(res => res.body)
     );
 }

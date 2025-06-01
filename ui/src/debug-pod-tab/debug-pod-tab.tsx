@@ -101,7 +101,7 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
         }
         try {
             setIsLoading(true);
-            const debugPod = await createDebugPod(props.application.spec.destination.name, targetPod);
+            const debugPod = await createDebugPod(props.application.spec.destination.name, props.resource.metadata.name, props.application.metadata.name, targetPod);
             setCreatedPod({
                 cluster: debugPod.cluster,
                 namespace: debugPod.pod.metadata.namespace,

@@ -12,6 +12,7 @@ import {DebugPodEventsTab} from './debug-pod-events-tab';
 
 import './debug-pod-flyout.scss';
 import { DebugPodUploadTab } from './debug-pod-upload-tab';
+import { PodTerminalViewer } from './pod-terminal-viewer/pod-terminal-viewer';
 
 interface DebugPodFlyoutProps {
     selectedPod: DebugPod;
@@ -48,6 +49,27 @@ export const DebugPodFlyout = ({ selectedPod, onClose, setNotification }: DebugP
 
     const handleConnect = () => {
         setShowConnectFlyout(true);
+    }
+
+    const getApplicationName = () => {
+        if (!selectedPod) {
+            return '';
+        }
+        
+        const label = selectedPod.pod.metadata.annotations?.['argocd.argoproj.io/tracking-id'];
+        if (!label) {
+            return '';
+        }
+
+        return label.split(':')[0];
+    }
+
+    const getApplicationNamespace = () => {
+        return 'argocd';
+    }
+
+    const getProjectName = () => {
+        return 'default';
     }
 
     return (
@@ -110,6 +132,14 @@ export const DebugPodFlyout = ({ selectedPod, onClose, setNotification }: DebugP
                                 title: 'UPLOAD',
                                 content: (
                                     <DebugPodUploadTab selectedPod={selectedPod} setNotification={setNotification} />
+                                )
+                            },
+                            {
+                                key: 'terminal',
+                                icon: 'fa fa-terminal',
+                                title: 'TERMINAL',
+                                content: (
+                                    <PodTerminalViewer selectedPod={selectedPod} setNotification={setNotification} applicationName={getApplicationName()} applicationNamespace={getApplicationNamespace()} projectName={getProjectName()} />
                                 )
                             }
                         ]}

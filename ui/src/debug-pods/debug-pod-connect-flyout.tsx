@@ -76,16 +76,15 @@ gcloud components install gke-gcloud-auth-plugin`}
                     <div>
                         <CollapsibleCodeSection
                             title="Connect to the cluster"
-                            desc={`Apply the following commands if you haven't connected to the cluster ${selectedPod.cluster} before`}
-                            code={`gcloud container clusters get-credentials ${selectedPod.cluster} --region ${selectedPod.region} --project ${selectedPod.projectId}
-kubectl config set clusters.gke_${selectedPod.projectId}_${selectedPod.region}_${selectedPod.cluster}.proxy-url http://${selectedPod.bastionHost}:8888`}
+                            desc={<span>Apply the following commands if you haven't connected to the cluster <b>{selectedPod.cluster}</b> before</span>}
+                            code={`gcloud container clusters get-credentials ${selectedPod.cluster} --region ${selectedPod.region} --project ${selectedPod.projectId}`}
                         />
                     </div>
                     <div>
                         <CollapsibleCodeSection
                             title="Choose the cluster context"
                             desc="Apply the following commands once"
-                            code={`kubectl config set-context gke_${selectedPod.projectId}_${selectedPod.region}_${selectedPod.cluster} --namespace=${selectedPod.pod.metadata.namespace}`}
+                            code={`kubectl config use-context gke_${selectedPod.projectId}_${selectedPod.region}_${selectedPod.cluster}`}
                         />
                     </div>
                     <div>
@@ -98,7 +97,7 @@ kubectl config set clusters.gke_${selectedPod.projectId}_${selectedPod.region}_$
                     <div>
                         <CollapsibleCodeSection
                             title="Connect to the pod"
-                            desc="Apply the following commands once"
+                            desc="Run this to connect to the pod"
                             code={`kubectl exec -it ${selectedPod.pod.metadata.name} -- sh`}
                         />
                     </div>

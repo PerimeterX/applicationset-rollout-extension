@@ -43,7 +43,7 @@ export const DebugPodEventsTab = ({cluster, namespace, pod}: DebugPodEventsTabPr
                 <div className="event-header-col event-first">FIRST OCCURRED</div>
                 <div className="event-header-col event-last">LAST OCCURRED</div>
             </div>
-            {events.map(event => (
+            {events.reverse().map(event => (
                 <div key={event.metadata.name} className={`event-card event-type-${event.type?.toLowerCase()}`}> 
                     <div className="event-col event-source">{event.involvedObject.kind}: {event.involvedObject.name}</div>
                     <div className="event-col event-reason">{event.reason}</div>

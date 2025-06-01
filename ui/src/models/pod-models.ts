@@ -1,7 +1,6 @@
 export interface DebugPod {
     environment: string;
     projectId: string;
-    bastionHost: string;
     region: string;
     cluster: string;
     pod: Pod;
