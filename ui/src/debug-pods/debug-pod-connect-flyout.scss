@@ -20,12 +20,6 @@
     margin-bottom: 1.5em;
 
     .section-header {
-        cursor: pointer;
-
-        &:hover .section-copy-icon {
-            opacity: 1;
-        }
-
         .section-copy-icon-copied {
             color: $argo-color-teal-6;
             font-size: 12px;
@@ -36,11 +30,10 @@
     }
 
     .section-title {
-        font-size: 12px;
-        color: $argo-color-gray-6;
+        font-size: 0.8em;
+        color: $argo-color-gray-7;
         text-transform: uppercase;
         font-weight: 600;
-        margin-bottom: 0.3em;
         letter-spacing: 0.5px;
         display: flex;
         align-items: center;
@@ -54,17 +47,17 @@
         }
     }
     .section-desc {
-        font-size: 12px;
-        color: $argo-color-gray-5;
+        font-size: 0.8em;
+        color: $argo-color-gray-7;
         margin-bottom: 0.5em;
     }
     .code-bar {
-        background: $argo-color-gray-8;
+        background: $argo-color-gray-3;
         border-radius: 4px;
         padding: 0.7em 1em 0.7em 1em;
         font-family: 'Fira Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
-        font-size: 13px;
-        color: $argo-color-gray-3;
+        font-size: 12px;
+        color: $argo-color-gray-6;
         overflow-x: auto;
         position: relative;
         margin-bottom: 0.5em;
@@ -75,29 +68,19 @@
     }
     .copy-btn {
         position: absolute;
-        top: 8px;
-        right: 8px;
+        top: 4px;
+        right: 4px;
         background: none;
         border: none;
-        color: $argo-color-gray-6;
+        color: $argo-color-gray-5;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 16px;
         padding: 2px 6px;
         border-radius: 3px;
         transition: background 0.2s;
         &:hover {
-            background: $argo-color-gray-3;
+            background: $argo-color-gray-4;
+            color: $argo-color-gray-6;
         }
-    }
-    .collapse-toggle {
-        font-size: 12px;
-        color: $argo-color-teal-6;
-        background: none;
-        border: none;
-        cursor: pointer;
-        margin-bottom: 0.3em;
-        padding: 0;
-        text-transform: uppercase;
-        font-weight: 500;
     }
 }

@@ -233,7 +233,7 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
         }
     }, [appSet]);
 
-    const refreshApplications = async () => {
+    const refreshApplications = async (refreshGitOps = false) => {
         if (!appSet?.status?.resources) {
             return;
         }
@@ -243,7 +243,7 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
             const results = await Promise.all(
                 appSet.status.resources.map(async resource => {
                     try {
-                        const app = await getApplication(resource.name, resource.namespace);
+                        const app = await getApplication(resource.name, resource.namespace, refreshGitOps ? 'normal' : undefined);
                         const resourceTree = appRolloutIsProcessing(app) ? await getResourceTree(resource.name, resource.namespace) : undefined;
                         return {
                             key: `${resource.namespace}/${resource.name}`,
@@ -546,7 +546,7 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
                             className='argo-button argo-button--base' 
                             onClick={async (e) => {
                                 e.stopPropagation();
-                                await refreshApplications();
+                                await refreshApplications(true);
                             }}
                             disabled={isRefreshing}
                         >

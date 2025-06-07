@@ -5,20 +5,44 @@ import {map, Observable} from 'rxjs';
 import {LogEntry} from '../models/log-models';
 import {Event} from '../models/event-models';
 
+const APPLICATION_HEADER_NAME = 'Argocd-Application-Name';
+const APPLICATION_HEADER_VALUE = 'argocd:argocd-debug-pod-extension';
+const PROJECT_HEADER_NAME = 'Argocd-Project-Name';
+const PROJECT_HEADER_VALUE = 'default';
+
 export function getDebugPods(): Promise<DebugPod[]> {
-    return call(() => requests.get('/extensions/debugpods/debug_pods', true).then(res => res.body));
+    return call(() => 
+        requests.get('/extensions/debugpods/debug_pods', true)
+            .set(APPLICATION_HEADER_NAME, APPLICATION_HEADER_VALUE)
+            .set(PROJECT_HEADER_NAME, PROJECT_HEADER_VALUE)
+            .then(res => res.body)
+    );
 }
 
 export function createDebugPod(cluster: string, originalPodName: string, applicationName: string, pod: Pod): Promise<DebugPod> {
-    return call(() => requests.post('/extensions/debugpods/debug_pod', true).send({cluster, originalPodName, applicationName, pod}).then(res => res.body));
+    return call(() => 
+        requests.postJson('/extensions/debugpods/debug_pod', true)
+            .set(APPLICATION_HEADER_NAME, APPLICATION_HEADER_VALUE)
+            .set(PROJECT_HEADER_NAME, PROJECT_HEADER_VALUE)
+            .send({cluster, originalPodName, applicationName, pod})
+            .then(res => res.body)
+    );
 }
 
 export function deleteDebugPod(cluster: string, pod: string): Promise<void> {
-    return call(() => requests.delete('/extensions/debugpods/debug_pod', true).send({cluster, pod}));
+    return call(() => requests.deleteJson('/extensions/debugpods/debug_pod', true)
+            .set(APPLICATION_HEADER_NAME, APPLICATION_HEADER_VALUE)
+            .set(PROJECT_HEADER_NAME, PROJECT_HEADER_VALUE)
+            .send({cluster, pod})
+    );
 }
 
 export function getContainerLogs(cluster: string, namespace, pod: string, container: string): Observable<LogEntry> {
-    const entries = requests.loadEventSource(`/extensions/debugpods/logs?container=${container}&namespace=${namespace}&pod=${pod}&cluster=${cluster}`, true).pipe(map(content => ({content}) as LogEntry));
+    const entries = requests.loadEventSource(`/extensions/debugpods/logs?container=${container}&namespace=${namespace}&pod=${pod}&cluster=${cluster}`, {
+        [APPLICATION_HEADER_NAME]: APPLICATION_HEADER_VALUE,
+        [PROJECT_HEADER_NAME]: PROJECT_HEADER_VALUE
+    }, true)
+            .pipe(map(content => ({content}) as LogEntry));
     let first = true;
     return new Observable(observer => {
         const subscription = entries.subscribe(
@@ -46,7 +70,10 @@ export function getContainerLogs(cluster: string, namespace, pod: string, contai
 }
 
 export function getPodEvents(cluster: string, namespace: string, pod: string): Observable<Event> {
-    const entries = requests.loadEventSource(`/extensions/debugpods/events?namespace=${namespace}&pod=${pod}&cluster=${cluster}`, true).pipe(map(data => JSON.parse(data) as Event));
+    const entries = requests.loadEventSource(`/extensions/debugpods/events?namespace=${namespace}&pod=${pod}&cluster=${cluster}`, {
+        [APPLICATION_HEADER_NAME]: APPLICATION_HEADER_VALUE,
+        [PROJECT_HEADER_NAME]: PROJECT_HEADER_VALUE
+    }, true).pipe(map(data => JSON.parse(data) as Event));
     return new Observable(observer => {
         const subscription = entries.subscribe(
             entry => {
@@ -93,7 +120,8 @@ export function copyFiles(
     namespace: string,
     pod: string,
     container: string,
-    destination: string
+    destination: string,
+    onProgress: (progress: number) => void,
 ): Promise<void> {
     const formData = new FormData();
     
@@ -110,7 +138,27 @@ export function copyFiles(
     formData.append('destination', destination);
 
     return call(() => 
-        requests.postFormData('/extensions/debugpods/copy_files', formData, true)
-            .then(res => res.body)
+        requests.post('/extensions/debugpods/copy_files', true)
+            .set(APPLICATION_HEADER_NAME, APPLICATION_HEADER_VALUE)
+            .set(PROJECT_HEADER_NAME, PROJECT_HEADER_VALUE)
+            .buffer(false)
+            .send(formData)
+            .on('progress', (event) => {
+                if (event.direction === 'upload') {
+                    if (event.percent) {
+                        const uploadProgress = event.percent / 100;
+                        onProgress(uploadProgress / 2);
+                    }
+                } else if (event.direction === 'download') {
+                    const parts = event?.target?.response?.split('\n');
+                    if (parts.length > 1) {
+                        const lastPart = parts[parts.length - 2];
+                        try {
+                            const downloadProgress = parseFloat(lastPart);
+                            onProgress(0.5 + (downloadProgress / 2));
+                        } catch (e) {}
+                    }
+                }
+            })
     );
 }

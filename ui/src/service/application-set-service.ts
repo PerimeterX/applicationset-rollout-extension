@@ -20,7 +20,7 @@ export function syncApplication(
 ): Promise<boolean> {
     return callWithRetries(RETRIES, () =>
         requests
-            .post(`/applications/${name}/sync`)
+            .postJson(`/applications/${name}/sync`)
             .send({
                 appNamespace,
                 revision,
@@ -34,7 +34,7 @@ export function syncApplication(
 export function rollback(name: string, appNamespace: string, id: number): Promise<boolean> {
     return callWithRetries(RETRIES, () => 
         requests
-            .post(`/applications/${name}/rollback`)
+            .postJson(`/applications/${name}/rollback`)
             .send({id, appNamespace})
             .then(() => true)
     );
@@ -43,7 +43,7 @@ export function rollback(name: string, appNamespace: string, id: number): Promis
 export function runResourceAction(name: string, appNamespace: string, resource: Resource, action: string): Promise<any> {
     return callWithRetries(RETRIES, () =>
         requests
-            .post(`/applications/${name}/resource/actions`)
+            .postJson(`/applications/${name}/resource/actions`)
             .query({
                 appNamespace,
                 namespace: resource.namespace,

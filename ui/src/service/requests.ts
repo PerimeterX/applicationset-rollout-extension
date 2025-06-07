@@ -3,17 +3,7 @@ import * as agent from 'superagent';
 
 import {BehaviorSubject, Observable, Observer} from 'rxjs';
 import {filter} from 'rxjs/operators';
-
-type Callback = (data: any) => void;
-
-declare class EventSource {
-    public onopen: Callback;
-    public onmessage: Callback;
-    public onerror: Callback;
-    public readyState: number;
-    constructor(url: string);
-    public close(): void;
-}
+import {EventSource} from 'eventsource'
 
 enum ReadyState {
     CONNECTING = 0,
@@ -63,28 +53,37 @@ export default {
     },
 
     post(url: string, absoluteUrl = false) {
+        return initHandlers(agent.post(`${apiRoot(absoluteUrl)}${url}`));
+    },
+
+    postJson(url: string, absoluteUrl = false) {
         return initHandlers(agent.post(`${apiRoot(absoluteUrl)}${url}`)).set('Content-Type', 'application/json');
     },
 
-    postFormData(url: string, formData: FormData, absoluteUrl = false) {
-        return initHandlers(agent.post(`${apiRoot(absoluteUrl)}${url}`)).send(formData);
-    },
-
-    put(url: string, absoluteUrl = false) {
+    putJson(url: string, absoluteUrl = false) {
         return initHandlers(agent.put(`${apiRoot(absoluteUrl)}${url}`)).set('Content-Type', 'application/json');
     },
 
-    patch(url: string, absoluteUrl = false) {
+    patchJson(url: string, absoluteUrl = false) {
         return initHandlers(agent.patch(`${apiRoot(absoluteUrl)}${url}`)).set('Content-Type', 'application/json');
     },
 
-    delete(url: string, absoluteUrl = false) {
+    deleteJson(url: string, absoluteUrl = false) {
         return initHandlers(agent.del(`${apiRoot(absoluteUrl)}${url}`)).set('Content-Type', 'application/json');
     },
 
-    loadEventSource(url: string, absoluteUrl = false): Observable<string> {
+    loadEventSource(url: string, headers: Record<string, string> = {}, absoluteUrl = false): Observable<string> {
         return Observable.create((observer: Observer<any>) => {
-            let eventSource = new EventSource(`${apiRoot(absoluteUrl)}${url}`);
+            let eventSource = new EventSource(`${apiRoot(absoluteUrl)}${url}`, {
+                fetch: (input, init) =>
+                    fetch(input, {
+                        ...init,
+                        headers: {
+                            ...init.headers,
+                            ...headers
+                        },
+                    }),
+            });
             eventSource.onmessage = msg => observer.next(msg.data);
             eventSource.onerror = e => () => {
                 observer.error(e);

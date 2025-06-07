@@ -16,7 +16,7 @@ export const DebugPodUploadTab = ({ selectedPod, setNotification }: DebugPodUplo
     const [isDragging, setIsDragging] = useState(false);
     const [selectedContainer, setSelectedContainer] = useState<string>('');
     const [destinationPath, setDestinationPath] = useState<string>('/');
-    const [isLoading, setIsLoading] = useState(false);
+    const [loader, setLoader] = useState<{percent: number} | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const dirInputRef = useRef<HTMLInputElement>(null);
 
@@ -99,9 +99,11 @@ export const DebugPodUploadTab = ({ selectedPod, setNotification }: DebugPodUplo
     };
 
     const handleUpload = async () => {
-        setIsLoading(true);
+        setLoader({percent: 0});
         try {
-            await copyFiles(selectedFiles, selectedPod.cluster, selectedPod.pod.metadata.namespace, selectedPod.pod.metadata.name, selectedContainer, destinationPath);
+            await copyFiles(selectedFiles, selectedPod.cluster, selectedPod.pod.metadata.namespace, selectedPod.pod.metadata.name, selectedContainer, destinationPath, (progress) => {
+                setLoader({percent: progress});
+            });
             setNotification({
                 message: `Successfully uploaded ${selectedFiles.length} files to ${selectedContainer}`,
                 type: 'success'
@@ -114,12 +116,12 @@ export const DebugPodUploadTab = ({ selectedPod, setNotification }: DebugPodUplo
                 requireApproval: true
             });
         } finally {
-            setIsLoading(false);
+            setLoader(null);
         }
     }
 
-    if (isLoading) {
-        return <Loader />;
+    if (loader) {
+        return <Loader percent={loader.percent} />;
     }
 
     return (
@@ -295,7 +297,7 @@ async function isSameFile(file1: File, file2: File) {
 async function getAllFileEntries(dataTransferItemList: DataTransferItemList): Promise<File[]> {
     const files: File[] = [];
 
-    async function traverseFileTree(entry: any, path = ''): Promise<void> {
+    async function traverseFileTree(entry: any, path: string): Promise<void> {
         if (entry.isFile) {
             await new Promise<void>(resolve => {
                 entry.file((file: File) => {
@@ -315,9 +317,13 @@ async function getAllFileEntries(dataTransferItemList: DataTransferItemList): Pr
                             resolve();
                             return;
                         }
-                        await Promise.all(entries.map((entry: any) =>
-                            traverseFileTree(entry, path + (path && !path.endsWith('/') ? '/' : '') + entry.name)
-                        ));
+                        try { 
+                            await Promise.all(entries.map((entry: any) =>
+                                traverseFileTree(entry, path + (path && !path.endsWith('/') ? '/' : '') + entry.name)
+                            ));
+                        } catch (e) {
+                            reject(e);
+                        }
                         readEntries();
                     });
                 };
@@ -331,6 +337,6 @@ async function getAllFileEntries(dataTransferItemList: DataTransferItemList): Pr
         const entry = dataTransferItemList[i].webkitGetAsEntry();
         if (entry) entries.push(entry);
     }
-    await Promise.all(entries.map(entry => traverseFileTree(entry)));
+    await Promise.all(entries.map(entry => traverseFileTree(entry, entry.isDirectory ? entry.name + '/' : '')));
     return files;
 }

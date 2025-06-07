@@ -9,10 +9,10 @@ import {DebugPodManifest} from './debug-pod-manifest';
 import {DebugPodConnectFlyout} from './debug-pod-connect-flyout';
 import {PrettyLogs} from '../pretty-logs/pretty-logs-tab';
 import {DebugPodEventsTab} from './debug-pod-events-tab';
+import {DebugPodUploadTab} from './debug-pod-upload-tab';
+import {PodTerminalViewer} from './pod-terminal-viewer/pod-terminal-viewer';
 
 import './debug-pod-flyout.scss';
-import { DebugPodUploadTab } from './debug-pod-upload-tab';
-import { PodTerminalViewer } from './pod-terminal-viewer/pod-terminal-viewer';
 
 interface DebugPodFlyoutProps {
     selectedPod: DebugPod;

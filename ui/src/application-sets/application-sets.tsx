@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as moment from 'moment';
-import classNames from 'classnames';
 
 import {KeybindingProvider} from '../shared-components/keypress';
 import {DataLoader} from '../shared-components/data-loader';
@@ -8,7 +7,6 @@ import {ApplicationSet, ApplicationSource} from '../models/application-set-model
 import {listApplicationSets} from '../service/application-set-service';
 import {Tooltip} from '../shared-components/tooltip';
 import {Paginate} from '../shared-components/paginate/paginate';
-import {getApplication} from '../service/application-set-service';
 import {ApplicationSetScreen} from './application-set-screen';
 import {NotificationBar, Notification} from '../shared-components/notification-bar/notification-bar';
 import {NavigationManager} from '../shared-components/navigation';
@@ -136,9 +134,9 @@ export const ApplicationSets = () => {
     const [notification, setNotification] = React.useState<Notification | null>(null);
     const [search, setSearch] = React.useState(urlParams.get('search') || '');
     const [favorites, setFavorites] = React.useState<Set<string>>(getFavorites());
-    const [isRefreshing, setIsRefreshing] = React.useState<{[key: string]: boolean}>({});
     const [selectedAppSet, setSelectedAppSet] = React.useState<ApplicationSet | null>(null);
     const [isClearingSelection, setIsClearingSelection] = React.useState(false);
+    const [isRefreshing, setIsRefreshing] = React.useState(false);
 
     const toggleShowFavoritesOnly = (value: boolean) => {
         setShowFavoritesOnly(value);
@@ -147,6 +145,7 @@ export const ApplicationSets = () => {
 
     const loadApplicationSets = async () => {
         try {
+            setIsRefreshing(true);
             const appSets = await listApplicationSets();
             setApplicationSets(appSets);
         } catch (e) {
@@ -154,6 +153,8 @@ export const ApplicationSets = () => {
                 message: `Failed to load application sets: ${e}`,
                 type: 'error'
             });
+        } finally {
+            setIsRefreshing(false);
         }
     };
 
@@ -193,36 +194,6 @@ export const ApplicationSets = () => {
             navigationManager.goto('.', currentParams, {replace: true});
         }
     }, [selectedAppSet, applicationSets, isClearingSelection]);
-
-    const refreshApplications = async (appSet: ApplicationSet) => {
-        if (!appSet.status?.resources) {
-            return;
-        }
-
-        setIsRefreshing(prev => ({...prev, [appSet.metadata.name]: true}));
-        
-        try {
-            const refreshPromises = appSet.status.resources.map(async resource => {
-                try {
-                    await getApplication(resource.name, resource.namespace, 'normal');
-                    return true;
-                } catch (e) {
-                    setNotification({message: `Failed to refresh application ${resource.name}`, type: 'error'});
-                    return false;
-                }
-            });
-
-            const results = await Promise.all(refreshPromises);
-            const successCount = results.filter(success => success).length;
-            
-            setNotification({
-                message: `Successfully refreshed ${successCount} of ${appSet.status.resources.length} applications`,
-                type: 'success'
-            });
-        } finally {
-            setIsRefreshing(prev => ({...prev, [appSet.metadata.name]: false}));
-        }
-    };
 
     const toggleFavorite = (appSetName: string) => {
         const newFavorites = new Set(favorites);
@@ -377,20 +348,6 @@ export const ApplicationSets = () => {
                     <div className='label'>Created:</div>
                     <div className='value'>{createdAt}</div>
                 </div>
-
-                <div className='actions'>
-                    <button 
-                        className='argo-button argo-button--base'
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            refreshApplications(appSet);
-                        }}
-                        disabled={!appSet.status?.resources?.length || isRefreshing[appSet.metadata.name]}
-                    >
-                        <i className={classNames('fa fa-redo', {'fa-spin': isRefreshing[appSet.metadata.name]})} /> 
-                        {isRefreshing[appSet.metadata.name] ? 'Refreshing...' : 'Refresh Applications'}
-                    </button>
-                </div>
             </div>
         );
     };
@@ -417,6 +374,14 @@ export const ApplicationSets = () => {
                                         <div className='top-bar row flex-top-bar'>
                                             <div className='flex-top-bar__actions'>
                                                 <div className='application-set-tiles__header'>
+                                                    <button
+                                                        className='argo-button argo-button--base'
+                                                        style={{marginRight: '8px'}}
+                                                        disabled={isRefreshing}
+                                                        onClick={() => loadApplicationSets()}>
+                                                        <i className='fa fa-sync-alt' style={{marginRight: '4px'}} />
+                                                        Refresh
+                                                    </button>
                                                     <button
                                                         className={`argo-button argo-button--base-o favorites-toggle ${showFavoritesOnly ? 'favorites-toggle--active' : ''}`}
                                                         onClick={() => toggleShowFavoritesOnly(!showFavoritesOnly)}>
