@@ -3,8 +3,8 @@ import {useCallback, useRef, useState} from 'react';
 import {DebugPod} from '../models/pod-models';
 import {copyFiles} from '../service/debug-pod-service';
 import {Notification} from '../shared-components/notification-bar/notification-bar';
+import {Loader} from '../shared-components/loader/loader';
 import './debug-pod-upload-tab.scss';
-import { Loader } from '../shared-components/loader/loader';
 
 export interface DebugPodUploadTabProps {
     setNotification: (notification: Notification | null) => void;
