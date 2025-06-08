@@ -26,7 +26,8 @@ const config = {
     },
     externals: [
         {
-            react: 'React'
+            react: 'React',
+            'monaco-editor': 'monaco'
         }
     ],
     plugins: [

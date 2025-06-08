@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "peerDeependencies": {
+  "peerDependencies": {
     "@types/react": "^16.8.5",
     "monaco-editor": "^0.52.2",
     "react": "^16.9.3",
@@ -17,7 +17,6 @@
     "@types/uuid": "^10.0.0",
     "css-loader": "^6.7.3",
     "mini-css-extract-plugin": "^2.7.2",
-    "monaco-editor": "^0.52.2",
     "node-sass": "^8.0.0",
     "raw-loader": "^4.0.2",
     "sass": "^1.34.1",
@@ -38,7 +37,6 @@
     "moment": "^2.30.1",
     "path": "^0.12.7",
     "react-autocomplete": "1.8.1",
-    "react-dom": "^16.9.3",
     "react-moment": "^0.9.7",
     "react-paginate": "^8.3.0",
     "rxjs": "^7.8.1",
