@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import * as monacoEditor from 'monaco-editor';
+import MonacoLoader from './monaco-loader';
 
 export interface EditorInput {
     text: string;
@@ -23,8 +24,9 @@ function IsEqualInput(first?: EditorInput, second?: EditorInput) {
 
 const DEFAULT_LINE_HEIGHT = 18;
 
-const MonacoEditorLazy = React.lazy(() =>
-    import('monaco-editor').then(monaco => {
+const MonacoEditorLazy = React.lazy(() => {
+    const monacoLoader = new MonacoLoader();
+    return monacoLoader.load().then(monaco => {
         const Component = (props: MonacoProps) => {
             const [height, setHeight] = React.useState(0);
 
@@ -77,8 +79,8 @@ const MonacoEditorLazy = React.lazy(() =>
         return {
             default: Component
         };
-    })
-);
+    });
+});
 
 export const MonacoEditor = (props: MonacoProps) => (
     <React.Suspense fallback={<div>Loading...</div>}>

@@ -1,6 +1,5 @@
 const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 const groupKind = 'argoproj.io/ApplicationSet';
 const webpack = require('webpack');
@@ -29,7 +28,8 @@ const config = {
     externals: [
         {
             'react': 'React',
-            'react-dom': 'ReactDOM'
+            'react-dom': 'ReactDOM',
+            'monaco-editor': 'monaco'
         }
     ],
     plugins: [
@@ -41,11 +41,6 @@ const config = {
             'SYSTEM_INFO': JSON.stringify({
                 version: process.env.ARGO_VERSION || 'latest'
             })
-        }),
-        new MonacoWebpackPlugin({
-            languages: ['yaml'],
-            customLanguages: [],
-            globalAPI: true
         }),
         new webpack.IgnorePlugin({
             resourceRegExp: /\.(ttf|woff|woff2|eot)$/
