@@ -8,7 +8,7 @@
     "react-dom": "^16.9.3"
   },
   "scripts": {
-    "build": "rm -rf dist && NODE_ENV=production webpack --config webpack.config.js && tar -C dist -cvf dist/extension.tar resources"
+    "build": "rm -rf dist && NODE_ENV=production webpack --config webpack.config.js && find dist -name '*.worker.js' -delete && tar -C dist -cvf dist/extension.tar resources"
   },
   "devDependencies": {
     "@types/react": "^16.9.3",

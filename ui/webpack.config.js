@@ -13,7 +13,8 @@ const config = {
         path: __dirname + `/dist/resources/${groupKind}/ui`,
         libraryTarget: 'window',
         library: ['extensions', 'resources', groupKind],
-        chunkLoading: false
+        chunkLoading: false,
+        globalObject: 'self'
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.json', '.ttf', '.scss'],
@@ -42,8 +43,14 @@ const config = {
             })
         }),
         new MonacoWebpackPlugin({
-            languages: ['yaml', 'json', 'javascript', 'typescript']
-        })],
+            languages: ['yaml'],
+            customLanguages: [],
+            globalAPI: true
+        }),
+        new webpack.IgnorePlugin({
+            resourceRegExp: /\.(ttf|woff|woff2|eot)$/
+        })
+    ],
     module: {
         rules: [
             {
@@ -61,10 +68,6 @@ const config = {
             {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader'],
-            },
-            {
-                test: /\.ttf$/,
-                type: 'asset/resource'
             }
         ],
     },
