@@ -12,6 +12,7 @@ const config = {
         path: __dirname + `/dist/resources/${groupKind}/ui`,
         libraryTarget: 'window',
         library: ['extensions', 'resources', groupKind],
+        chunkLoading: false
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.json', '.ttf', '.scss'],
@@ -20,6 +21,8 @@ const config = {
         minimizer: [new TerserPlugin({
             extractComments: false,
         })],
+        splitChunks: false,
+        runtimeChunk: false
     },
     externals: [
         {
