@@ -3,8 +3,8 @@ import {useState, useEffect} from 'react';
 
 import * as moment from 'moment';
 import {DropDownMenu} from '../shared-components/dropdown-menu';
-import {ApplicationSet, Application, ApplicationResource, ResourceTree} from './models';
-import {getApplication, runResourceAction, syncApplication, getResourceTree} from './service';
+import {ApplicationSet, Application, ApplicationResource, ResourceTree} from '../models/application-set-models';
+import {getApplication, runResourceAction, syncApplication, getResourceTree} from '../service/application-set-service';
 import {NotificationBar, Notification} from "../shared-components/notification-bar/notification-bar";
 import { Tooltip } from '../shared-components/tooltip';
 import { SyncFlyout, SyncOptions } from './sync-flyout';
@@ -183,9 +183,9 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
         );
     };
 
-    // Auto-refresh every 10 seconds when the screen is shown
+    // Auto-refresh every 20 seconds when the screen is shown
     useEffect(() => {
-        const interval = setInterval(() => refreshApplications(), 10000);
+        const interval = setInterval(() => refreshApplications(), 20 * 1000);
         return () => clearInterval(interval);
     }, []);
 
@@ -233,7 +233,7 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
         }
     }, [appSet]);
 
-    const refreshApplications = async () => {
+    const refreshApplications = async (refreshGitOps = false) => {
         if (!appSet?.status?.resources) {
             return;
         }
@@ -243,7 +243,7 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
             const results = await Promise.all(
                 appSet.status.resources.map(async resource => {
                     try {
-                        const app = await getApplication(resource.name, resource.namespace);
+                        const app = await getApplication(resource.name, resource.namespace, refreshGitOps ? 'normal' : undefined);
                         const resourceTree = appRolloutIsProcessing(app) ? await getResourceTree(resource.name, resource.namespace) : undefined;
                         return {
                             key: `${resource.namespace}/${resource.name}`,
@@ -546,7 +546,7 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
                             className='argo-button argo-button--base' 
                             onClick={async (e) => {
                                 e.stopPropagation();
-                                await refreshApplications();
+                                await refreshApplications(true);
                             }}
                             disabled={isRefreshing}
                         >

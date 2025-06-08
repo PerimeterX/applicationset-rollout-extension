@@ -1,0 +1,220 @@
+@import '../shared-components/config';
+
+.debug-pod-upload-tab {
+    background: $white-color;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 32px 32px 24px 32px;
+    max-width: 600px;
+    margin: 32px auto;
+
+    .upload-header {
+        color: $argo-color-teal-6;
+        font-size: 13px;
+        text-transform: uppercase;
+        font-weight: 500;
+        margin-bottom: 24px;
+    }
+
+    .upload-settings {
+        background: $white-color;
+        border-radius: 6px;
+        padding: 20px;
+        margin-bottom: 24px;
+        border: 1px solid $argo-color-gray-3;
+
+        &-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+
+        &-label {
+            width: 140px;
+            font-size: 13px;
+            color: $argo-color-gray-6;
+            text-transform: uppercase;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .argo-select, .argo-input {
+            flex: 1;
+            min-width: 0;
+            height: 36px;
+            border: 1px solid $argo-color-gray-4;
+            border-radius: 4px;
+            padding: 0 12px;
+            font-size: 14px;
+            color: $argo-color-gray-8;
+            background-color: $white-color;
+            transition: border-color 0.15s;
+
+            &:focus {
+                border-color: $argo-color-teal-5;
+                outline: none;
+            }
+
+            &::placeholder {
+                color: $argo-color-gray-5;
+            }
+        }
+
+        .argo-select {
+            padding-right: 30px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236D7F8B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 16px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    }
+
+    .upload-controls {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        min-width: 180px;
+        
+        .dropdown-item {
+            padding: 10px 16px;
+            font-size: 14px;
+            color: $argo-color-gray-7;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid $argo-color-gray-2;
+            position: relative;
+            &:last-child {
+                border-bottom: none;
+            }
+            .remove-file-btn {
+                background: none;
+                border: none;
+                color: $argo-color-gray-5;
+                margin-left: auto;
+                cursor: pointer;
+                padding: 2px 6px;
+                font-size: 15px;
+                transition: color 0.15s;
+                &:hover {
+                    color: $argo-failed-color;
+                }
+            }
+        }
+    }
+    .argo-button {
+        min-width: 120px;
+    }
+}
+
+.debug-pod-upload-tab.full-width {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    background: $white-color;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 32px 32px 24px 32px;
+}
+
+.debug-pod-upload-tab.full-width.drag-over {
+    border: 2px dashed $argo-color-teal-6;
+    background: rgba($argo-color-teal-6, 0.05);
+    position: relative;
+}
+.drop-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+}
+.drop-message {
+    text-align: center;
+    color: $argo-color-teal-6;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.debug-pod-upload-tab .upload-controls {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    justify-content: space-between;
+}
+
+.upload-controls-left {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.upload-controls-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.selected-files-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+.selected-files-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: $white-color;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    border-radius: 6px;
+    font-size: 15px;
+    margin-top: 0;
+}
+.selected-files-table th, .selected-files-table td {
+    padding: 14px 18px;
+    text-align: left;
+}
+.selected-files-table th {
+    background: $argo-color-gray-1;
+    color: $argo-color-gray-6;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid $argo-color-gray-3;
+}
+.selected-files-table tr {
+    border-bottom: 1px solid $argo-color-gray-2;
+}
+.selected-files-table tr:last-child {
+    border-bottom: none;
+}
+.selected-files-table td {
+    color: $argo-color-gray-8;
+    vertical-align: middle;
+}
+.remove-file-btn {
+    background: none;
+    border: none;
+    color: $argo-color-gray-5;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 15px;
+    transition: color 0.15s;
+    &:hover {
+        color: $argo-failed-color;
+    }
+} 

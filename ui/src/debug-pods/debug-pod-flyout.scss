@@ -1,0 +1,42 @@
+@import '../shared-components/config';
+
+.resource-details {
+    &__header {
+        display: flex;
+        margin-bottom: 1em;
+        align-items: center;
+        padding-right: 48px;
+        h1 {
+            color: $argo-color-gray-6;
+            font-size: 23px;
+            font-weight: 500;
+            margin-right: 5px;
+            margin-bottom: 0;
+        }
+    }
+}
+
+.debug-pod-flyout__header {
+    display: flex;
+    align-items: center;
+    padding-right: 48px;
+    margin-bottom: 1em;
+    .icon {
+        margin-right: 15px;
+        font-size: 24px;
+        color: $argo-color-gray-5;
+    }
+    .title {
+        font-size: 22px;
+        color: $argo-color-gray-8;
+        line-height: 1;
+        font-weight: 500;
+        margin-right: auto;
+    }
+    .debug-pod-flyout__header-buttons {
+        display: flex;
+        gap: 10px;
+        margin-left: 20px;
+        align-items: center;
+    }
+}

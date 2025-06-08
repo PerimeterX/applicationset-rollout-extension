@@ -1,8 +1,8 @@
 import {Observable} from "rxjs";
 import {map} from "rxjs/operators";
 
-import requests from '../requests/requests';
-import {LogEntry} from "./models";
+import requests from './requests';
+import {LogEntry} from "../models/log-models";
 
 export function getContainerLogs(query: {
     applicationName: string;

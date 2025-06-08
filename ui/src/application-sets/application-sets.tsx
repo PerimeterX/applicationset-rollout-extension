@@ -1,121 +1,18 @@
 import * as React from 'react';
 import * as moment from 'moment';
-import classNames from 'classnames';
 
-import {Key, KeybindingContext, KeybindingProvider} from '../shared-components/keypress';
+import {KeybindingProvider} from '../shared-components/keypress';
 import {DataLoader} from '../shared-components/data-loader';
-import {Autocomplete} from '../shared-components/autocomplete';
-import {ApplicationSet, ApplicationSource} from './models';
-import {listApplicationSets} from './service';
+import {ApplicationSet, ApplicationSource} from '../models/application-set-models';
+import {listApplicationSets} from '../service/application-set-service';
 import {Tooltip} from '../shared-components/tooltip';
 import {Paginate} from '../shared-components/paginate/paginate';
-import {getApplication} from './service';
 import {ApplicationSetScreen} from './application-set-screen';
 import {NotificationBar, Notification} from '../shared-components/notification-bar/notification-bar';
 import {NavigationManager} from '../shared-components/navigation';
+import {SearchBar} from '../shared-components/search-bar';
 
 import './application-sets.scss';
-
-interface AutocompleteItem {
-    value: string;
-    label: string;
-}
-
-const SearchBar = ({content, appSets, onChange}: {content: string; appSets: ApplicationSet[]; onChange: (value: string) => void}) => {
-    const searchBar = React.useRef<HTMLDivElement>(null);
-    const {useKeybinding} = React.useContext(KeybindingContext);
-    const [isFocused, setFocus] = React.useState(false);
-
-    useKeybinding({
-        keys: Key.SLASH,
-        action: () => {
-            if (searchBar.current) {
-                searchBar.current.querySelector('input').focus();
-                setFocus(true);
-                return true;
-            }
-            return false;
-        }
-    });
-
-    useKeybinding({
-        keys: Key.ESCAPE,
-        action: () => {
-            if (searchBar.current && isFocused) {
-                searchBar.current.querySelector('input').blur();
-                setFocus(false);
-                return true;
-            }
-            return false;
-        }
-    });
-
-    return (
-        <Autocomplete
-            filterSuggestions={true}
-            renderInput={inputProps => (
-                <div className='applications-list__search' ref={searchBar}>
-                    <i 
-                        className='fa fa-search' 
-                        style={{marginRight: '9px', cursor: 'pointer'}}
-                        onClick={() => {
-                            if (searchBar.current) {
-                                searchBar.current.querySelector('input').focus();
-                            }
-                        }}
-                    />
-                    <input
-                        {...inputProps}
-                        className='argo-field'
-                        placeholder='Search application sets...'
-                        onFocus={e => {
-                            e.target.select();
-                            if (inputProps.onFocus) {
-                                inputProps.onFocus(e);
-                            }
-                            setFocus(true);
-                        }}
-                        onBlur={e => {
-                            setFocus(false);
-                            if (inputProps.onBlur) {
-                                inputProps.onBlur(e);
-                            }
-                        }}
-                        onKeyUp={e => {
-                            if (e.key === 'Enter') {
-                                e.preventDefault();
-                                const value = (e.target as HTMLInputElement).value;
-                                onChange(value);
-                                (e.target as HTMLInputElement).blur();
-                            }
-                        }}
-                    />
-                    <div className='keyboard-hint'>/</div>
-                    {content && (
-                        <i className='fa fa-times' onClick={() => onChange('')} style={{cursor: 'pointer', marginLeft: '5px'}} />
-                    )}
-                </div>
-            )}
-            wrapperProps={{className: 'applications-list__search-wrapper'}}
-            renderItem={(item: AutocompleteItem) => (
-                <React.Fragment>
-                    <i className='icon fa fa-code-branch' /> {item.label}
-                </React.Fragment>
-            )}
-            onSelect={(value: string, item: AutocompleteItem) => {
-                onChange(item.value);
-            }}
-            onChange={e => {
-                onChange(e.target.value);
-            }}
-            value={content || ''}
-            items={appSets.map(appSet => ({
-                value: appSet.metadata.name,
-                label: appSet.metadata.name
-            }))}
-        />
-    );
-};
 
 const getStatusInfo = (appSet: ApplicationSet) => {
     const resources = appSet.status?.resources || [];
@@ -237,9 +134,9 @@ export const ApplicationSets = () => {
     const [notification, setNotification] = React.useState<Notification | null>(null);
     const [search, setSearch] = React.useState(urlParams.get('search') || '');
     const [favorites, setFavorites] = React.useState<Set<string>>(getFavorites());
-    const [isRefreshing, setIsRefreshing] = React.useState<{[key: string]: boolean}>({});
     const [selectedAppSet, setSelectedAppSet] = React.useState<ApplicationSet | null>(null);
     const [isClearingSelection, setIsClearingSelection] = React.useState(false);
+    const [isRefreshing, setIsRefreshing] = React.useState(false);
 
     const toggleShowFavoritesOnly = (value: boolean) => {
         setShowFavoritesOnly(value);
@@ -248,6 +145,7 @@ export const ApplicationSets = () => {
 
     const loadApplicationSets = async () => {
         try {
+            setIsRefreshing(true);
             const appSets = await listApplicationSets();
             setApplicationSets(appSets);
         } catch (e) {
@@ -255,12 +153,14 @@ export const ApplicationSets = () => {
                 message: `Failed to load application sets: ${e}`,
                 type: 'error'
             });
+        } finally {
+            setIsRefreshing(false);
         }
     };
 
     React.useEffect(() => {
         loadApplicationSets();
-        const interval = setInterval(loadApplicationSets, 10000);
+        const interval = setInterval(loadApplicationSets, 60 * 1000);
         return () => clearInterval(interval);
     }, []);
 
@@ -294,36 +194,6 @@ export const ApplicationSets = () => {
             navigationManager.goto('.', currentParams, {replace: true});
         }
     }, [selectedAppSet, applicationSets, isClearingSelection]);
-
-    const refreshApplications = async (appSet: ApplicationSet) => {
-        if (!appSet.status?.resources) {
-            return;
-        }
-
-        setIsRefreshing(prev => ({...prev, [appSet.metadata.name]: true}));
-        
-        try {
-            const refreshPromises = appSet.status.resources.map(async resource => {
-                try {
-                    await getApplication(resource.name, resource.namespace, 'normal');
-                    return true;
-                } catch (e) {
-                    setNotification({message: `Failed to refresh application ${resource.name}`, type: 'error'});
-                    return false;
-                }
-            });
-
-            const results = await Promise.all(refreshPromises);
-            const successCount = results.filter(success => success).length;
-            
-            setNotification({
-                message: `Successfully refreshed ${successCount} of ${appSet.status.resources.length} applications`,
-                type: 'success'
-            });
-        } finally {
-            setIsRefreshing(prev => ({...prev, [appSet.metadata.name]: false}));
-        }
-    };
 
     const toggleFavorite = (appSetName: string) => {
         const newFavorites = new Set(favorites);
@@ -478,20 +348,6 @@ export const ApplicationSets = () => {
                     <div className='label'>Created:</div>
                     <div className='value'>{createdAt}</div>
                 </div>
-
-                <div className='actions'>
-                    <button 
-                        className='argo-button argo-button--base'
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            refreshApplications(appSet);
-                        }}
-                        disabled={!appSet.status?.resources?.length || isRefreshing[appSet.metadata.name]}
-                    >
-                        <i className={classNames('fa fa-redo', {'fa-spin': isRefreshing[appSet.metadata.name]})} /> 
-                        {isRefreshing[appSet.metadata.name] ? 'Refreshing...' : 'Refresh Applications'}
-                    </button>
-                </div>
             </div>
         );
     };
@@ -519,6 +375,14 @@ export const ApplicationSets = () => {
                                             <div className='flex-top-bar__actions'>
                                                 <div className='application-set-tiles__header'>
                                                     <button
+                                                        className='argo-button argo-button--base'
+                                                        style={{marginRight: '8px'}}
+                                                        disabled={isRefreshing}
+                                                        onClick={() => loadApplicationSets()}>
+                                                        <i className='fa fa-sync-alt' style={{marginRight: '4px'}} />
+                                                        Refresh
+                                                    </button>
+                                                    <button
                                                         className={`argo-button argo-button--base-o favorites-toggle ${showFavoritesOnly ? 'favorites-toggle--active' : ''}`}
                                                         onClick={() => toggleShowFavoritesOnly(!showFavoritesOnly)}>
                                                         <i className='fa fa-star' />
@@ -526,7 +390,7 @@ export const ApplicationSets = () => {
                                                 </div>
                                                 <SearchBar 
                                                     content={search} 
-                                                    appSets={applicationSets} 
+                                                    values={applicationSets.map(appSet => appSet.metadata.name)} 
                                                     onChange={(value) => {
                                                         setSearch(value);
                                                         navigationManager.goto('.', {search: value, favorites: showFavoritesOnly.toString()}, {replace: true});

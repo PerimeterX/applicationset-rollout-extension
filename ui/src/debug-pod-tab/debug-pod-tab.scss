@@ -1,0 +1,58 @@
+@import '../shared-components/config';
+
+.debug-pod-tab {
+
+    &__form {
+        margin-bottom: 40px;
+    }
+
+    &__form-section {
+        margin-bottom: 20px;
+    }
+
+    &__form-title {
+        font-size: 13px;
+        color: $argo-color-gray-6;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+    }
+
+    label {
+        font-size: 13px;
+        color: $argo-color-gray-6;
+        text-transform: uppercase;
+        margin-bottom: 1em;
+    }
+
+    &__form-checkbox-group {
+        display: flex;
+        flex-direction: row;
+        gap: 32px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    &__manifest-title {
+        background: $white-color;
+        padding: 21px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    &__manifest-title-text {
+        color: $argo-color-teal-6;
+        font-size: 13px;
+        text-transform: uppercase;
+        font-weight: 500;
+    }
+
+    &__form--disabled {
+        opacity: 0.6;
+    }
+
+    &__create-btn-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 16px;
+    }
+}

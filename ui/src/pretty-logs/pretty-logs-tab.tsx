@@ -1,15 +1,17 @@
 import * as React from 'react';
-import {useEffect, useState, useRef} from 'react';
+import {useEffect, useState, useRef, useMemo, useCallback} from 'react';
 
 import {Tooltip} from '../shared-components/tooltip';
 import {bufferTime, delay, retryWhen} from 'rxjs/operators';
 
-import {Application, State, LogEntry} from './models';
+import {LogEntry} from '../models/log-models';
 import {parseAnsiColors} from './ansi-colors';
-import {getContainerLogs} from './service';
+import {getContainerLogs} from '../service/logs-service';
 import {ToggleButton} from '../shared-components/toggle-button';
+import {Application, State} from '../models/application-models';
 
 import './pretty-logs-tab.scss';
+import { Observable } from 'rxjs';
 
 // Determine if a string is valid JSON
 const isJson = (str: string): boolean => {
@@ -92,6 +94,33 @@ export const PrettyLogsTab: React.FC<{
     application: Application;
     resource: State;
 }> = ({application, resource}) => {
+    const getLogs = useCallback((container: string, filterText?: string) => {
+        return getContainerLogs({
+            applicationName: application.metadata.name,
+            appNamespace: application.metadata.namespace,
+            namespace: resource.metadata.namespace,
+            podName: resource.metadata.name,
+            resource: {
+                group: resource.kind === 'Pod' ? '' : resource.apiVersion?.split('/')[0] || '',
+                kind: resource.kind,
+                name: resource.metadata.name
+            },
+            containerName: container,
+            tail: 1000,
+            follow: true,
+            filter: filterText || undefined
+        })
+    }, [application.metadata.name, application.metadata.namespace, resource.metadata.namespace, resource.metadata.name, resource.kind]);
+
+    return <PrettyLogs resourceSpec={resource.spec} getLogs={getLogs} />;
+}
+
+export interface PrettyLogsProps {
+    resourceSpec: any;
+    getLogs: (container: string, filterText?: string) => Observable<LogEntry>;
+}
+
+export const PrettyLogs = ({resourceSpec, getLogs}: PrettyLogsProps) => {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [wrapLines, setWrapLines] = useState(() => {
         // Get the stored preference from localStorage, default to true if not set
@@ -121,31 +150,31 @@ export const PrettyLogsTab: React.FC<{
     }, [uiMode]);
 
     // Extract container information from the resource
-    const containerGroups = React.useMemo<ContainerGroup[]>(() => {
-        if (!resource.spec) return [];
+    const containerGroups = useMemo<ContainerGroup[]>(() => {
+        if (!resourceSpec) return [];
         
         const groups: ContainerGroup[] = [];
         
         // Add regular containers
-        if (resource.spec.containers && resource.spec.containers.length > 0) {
+        if (resourceSpec.containers && resourceSpec.containers.length > 0) {
             groups.push({
                 offset: 0,
                 title: 'CONTAINERS',
-                containers: resource.spec.containers
+                containers: resourceSpec.containers
             });
         }
         
         // Add init containers
-        if (resource.spec.initContainers && resource.spec.initContainers.length > 0) {
+        if (resourceSpec.initContainers && resourceSpec.initContainers.length > 0) {
             groups.push({
-                offset: (resource.spec.containers || []).length,
+                offset: (resourceSpec.containers || []).length,
                 title: 'INIT CONTAINERS',
-                containers: resource.spec.initContainers
+                containers: resourceSpec.initContainers
             });
         }
         
         return groups;
-    }, [resource.spec]);
+    }, [resourceSpec]);
 
     // Set the initial container when the resource changes
     useEffect(() => {
@@ -161,21 +190,7 @@ export const PrettyLogsTab: React.FC<{
             return;
         }
 
-        const logsSource = getContainerLogs({
-                applicationName: application.metadata.name,
-                appNamespace: application.metadata.namespace,
-                namespace: resource.metadata.namespace,
-                podName: resource.metadata.name,
-                resource: {
-                    group: resource.kind === 'Pod' ? '' : resource.apiVersion?.split('/')[0] || '',
-                    kind: resource.kind,
-                    name: resource.metadata.name
-                },
-                containerName: selectedContainer,
-                tail: 1000,
-                follow: true,
-                filter: filterText || undefined
-            }) // accumulate log changes and render only once every 100ms to reduce CPU usage
+        const logsSource = getLogs(selectedContainer, filterText) // accumulate log changes and render only once every 100ms to reduce CPU usage
             .pipe(bufferTime(100))
             .pipe(retryWhen(errors => errors.pipe(delay(500))))
             .subscribe(log => {
@@ -186,7 +201,7 @@ export const PrettyLogsTab: React.FC<{
             });
 
         return () => logsSource.unsubscribe();
-    }, [application.metadata.name, application.metadata.namespace, resource.metadata.namespace, resource.metadata.name, resource.kind, selectedContainer, filterText]);
+    }, [selectedContainer, getLogs]);
 
     // Update log mode when logs change
     useEffect(() => {
