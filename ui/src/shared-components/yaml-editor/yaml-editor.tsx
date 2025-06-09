@@ -13,6 +13,7 @@ export class YamlEditor<T> extends React.Component<
         vScrollbar?: boolean;
         onSave?: (data: any) => Promise<any>;
         onCancel?: () => any;
+        onEditingStateChange?: (editing: boolean) => void;
         minHeight?: number;
     },
     {
@@ -48,6 +49,9 @@ export class YamlEditor<T> extends React.Component<
                                                 const unmounted = await this.props.onSave(updated);
                                                 if (unmounted !== true) {
                                                     this.setState({editing: false});
+                                                    if (this.props.onEditingStateChange) {
+                                                        this.props.onEditingStateChange(false);
+                                                    }
                                                 }
                                             } catch (e) {
                                                 this.setState({
@@ -76,13 +80,21 @@ export class YamlEditor<T> extends React.Component<
                                         if (props.onCancel) {
                                             props.onCancel();
                                         }
+                                        if (this.props.onEditingStateChange) {
+                                            this.props.onEditingStateChange(false);
+                                        }
                                     }}
                                     className='argo-button argo-button--base-o'>
                                     Cancel
                                 </button>
                             </>
                         )) || (
-                            <button onClick={() => this.setState({editing: true})} className='argo-button argo-button--base'>
+                            <button onClick={() => {
+                                this.setState({editing: true});
+                                if (this.props.onEditingStateChange) {
+                                    this.props.onEditingStateChange(true);
+                                }
+                            }} className='argo-button argo-button--base'>
                                 Edit
                             </button>
                         )}

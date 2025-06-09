@@ -78,14 +78,15 @@ if ! command -v gke-gcloud-auth-plugin &> /dev/null; then
 fi &&
 
 # Get credentials for the cluster if not already present
-if ! kubectl config get-contexts -o name | grep -q "gke_px-common-dev_europe-west1_common-stg-data-europe-west1"; then
+if ! kubectl config get-contexts -o name | grep -q " ${selectedPod.cluster} "; then
     echo "Getting credentials for the cluster..."
     gcloud container clusters get-credentials ${selectedPod.cluster} --region ${selectedPod.region} --project ${selectedPod.projectId}
+    kubectl config rename-context gke_${selectedPod.projectId}_${selectedPod.region}_${selectedPod.cluster} ${selectedPod.cluster}
 fi &&
 
 # Switch to the context
 echo "Switching kubectl context..."
-kubectl config use-context gke_${selectedPod.projectId}_${selectedPod.region}_${selectedPod.cluster}
+kubectl config use-context ${selectedPod.cluster}
 `}
                         />
                     </div>

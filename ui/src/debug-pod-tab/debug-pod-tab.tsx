@@ -21,6 +21,7 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
     const [notification, setNotification] = useState<Notification | null>(null);
     const [createdPod, setCreatedPod] = useState<DebugPodEventsTabProps | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isYamlEditing, setIsYamlEditing] = useState<boolean>(false);
 
     useEffect(() => {
         if (sourcePod) {
@@ -160,99 +161,110 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                 ) : sourcePod ? (
                     <>
                         <div className="debug-pod-tab__create-btn-row">
-                            <button
-                                className="argo-button argo-button--base"
-                                onClick={handleCreateDebugPod}
-                            >
-                                <i className="fa fa-bug" style={{marginRight: 6}} />
-                                Create Debug Pod
-                            </button>
+                            <div className="debug-pod-tab__instructions">
+                                Edit the Pod manifest using the quick options and the manual edit below, and click the Create Debug Pod button to spin up a new Debug Pod
+                            </div>
+                            <Tooltip content="Please save or cancel your manual edits before creating the debug pod" enabled={isYamlEditing}>
+                                <div style={{display: 'inline-block'}}>
+                                    <button
+                                        className="argo-button argo-button--base"
+                                        onClick={handleCreateDebugPod}
+                                        disabled={isYamlEditing}
+                                    >
+                                        <i className="fa fa-bug" style={{marginRight: 6}} />
+                                        Create Debug Pod
+                                    </button>
+                                </div>
+                            </Tooltip>
                         </div>
-                        <Tooltip content={customYaml ? 'To edit, clear manual changes first' : ''} enabled={!!customYaml}>
-                            <div className={`debug-pod-tab__form${customYaml ? ' debug-pod-tab__form--disabled' : ''}`}>
-                                <div className='debug-pod-tab__form-section'>
-                                    <div className='debug-pod-tab__form-title'>Debug Containers</div>
-                                    <div className='debug-pod-tab__form-checkbox-group'>
-                                        {sourcePod.spec.containers.map(container => (
-                                            <div key={container.name} className='debug-pod-tab__form-checkbox'>
+                        <Tooltip content={customYaml ? 'To use quick options, clear manual changes first' : ''} enabled={!!customYaml}>
+                            <div className="debug-pod-tab__quick-options">
+                                <div className="debug-pod-tab__quick-options-title">Quick Options</div>
+                                <div className={`debug-pod-tab__form${customYaml ? ' debug-pod-tab__form--disabled' : ''}`}>
+                                    <div className='debug-pod-tab__form-section'>
+                                        <div className='debug-pod-tab__form-title'>Debug Containers</div>
+                                        <div className='debug-pod-tab__form-checkbox-group'>
+                                            {sourcePod.spec.containers.map(container => (
+                                                <div key={container.name} className='debug-pod-tab__form-checkbox'>
+                                                    <span className='argo-checkbox'>
+                                                        <input
+                                                            type='checkbox'
+                                                            id={`debug-${container.name}`}
+                                                            checked={debugContainers.has(container.name)}
+                                                            disabled={!!customYaml}
+                                                            onChange={e => {
+                                                                const newSet = new Set(debugContainers);
+                                                                if (e.target.checked) {
+                                                                    newSet.add(container.name);
+                                                                } else {
+                                                                    newSet.delete(container.name);
+                                                                }
+                                                                setDebugContainers(newSet);
+                                                            }}
+                                                        />
+                                                        <span><i className='fa fa-check'/></span>
+                                                    </span>
+                                                    <label htmlFor={`debug-${container.name}`}>{container.name}</label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className='debug-pod-tab__form-section'>
+                                        <div className='debug-pod-tab__form-title'>Options</div>
+                                        <div className='debug-pod-tab__form-checkbox-group'>
+                                            <div className='debug-pod-tab__form-checkbox'>
                                                 <span className='argo-checkbox'>
                                                     <input
                                                         type='checkbox'
-                                                        id={`debug-${container.name}`}
-                                                        checked={debugContainers.has(container.name)}
+                                                        id='retain-liveness'
+                                                        checked={retainLiveness}
+                                                        onChange={e => setRetainLiveness(e.target.checked)}
                                                         disabled={!!customYaml}
-                                                        onChange={e => {
-                                                            const newSet = new Set(debugContainers);
-                                                            if (e.target.checked) {
-                                                                newSet.add(container.name);
-                                                            } else {
-                                                                newSet.delete(container.name);
-                                                            }
-                                                            setDebugContainers(newSet);
-                                                        }}
                                                     />
                                                     <span><i className='fa fa-check'/></span>
                                                 </span>
-                                                <label htmlFor={`debug-${container.name}`}>{container.name}</label>
+                                                <label htmlFor='retain-liveness'>Retain Liveness Probes</label>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className='debug-pod-tab__form-section'>
-                                    <div className='debug-pod-tab__form-title'>Options</div>
-                                    <div className='debug-pod-tab__form-checkbox-group'>
-                                        <div className='debug-pod-tab__form-checkbox'>
-                                            <span className='argo-checkbox'>
-                                                <input
-                                                    type='checkbox'
-                                                    id='retain-liveness'
-                                                    checked={retainLiveness}
-                                                    onChange={e => setRetainLiveness(e.target.checked)}
-                                                    disabled={!!customYaml}
-                                                />
-                                                <span><i className='fa fa-check'/></span>
-                                            </span>
-                                            <label htmlFor='retain-liveness'>Retain Liveness Probes</label>
-                                        </div>
-                                        <div className='debug-pod-tab__form-checkbox'>
-                                            <span className='argo-checkbox'>
-                                                <input
-                                                    type='checkbox'
-                                                    id='retain-readiness'
-                                                    checked={retainReadiness}
-                                                    onChange={e => setRetainReadiness(e.target.checked)}
-                                                    disabled={!!customYaml}
-                                                />
-                                                <span><i className='fa fa-check'/></span>
-                                            </span>
-                                            <label htmlFor='retain-readiness'>Retain Readiness Probes</label>
-                                        </div>
-                                        <div className='debug-pod-tab__form-checkbox'>
-                                            <span className='argo-checkbox'>
-                                                <input
-                                                    type='checkbox'
-                                                    id='retain-startup-probe'
-                                                    checked={retainStartupProbe}
-                                                    onChange={e => setRetainStartupProbe(e.target.checked)}
-                                                    disabled={!!customYaml}
-                                                />
-                                                <span><i className='fa fa-check'/></span>
-                                            </span>
-                                            <label htmlFor='retain-startup-probe'>Retain Startup Probe</label>
-                                        </div>
-                                        <div className='debug-pod-tab__form-checkbox'>
-                                            <span className='argo-checkbox'>
-                                                <input
-                                                    type='checkbox'
-                                                    id='retain-labels'
-                                                    checked={retainLabels}
-                                                    onChange={e => setRetainLabels(e.target.checked)}
-                                                    disabled={!!customYaml}
-                                                />
-                                                <span><i className='fa fa-check'/></span>
-                                            </span>
-                                            <label htmlFor='retain-labels'>Retain Labels</label>
+                                            <div className='debug-pod-tab__form-checkbox'>
+                                                <span className='argo-checkbox'>
+                                                    <input
+                                                        type='checkbox'
+                                                        id='retain-readiness'
+                                                        checked={retainReadiness}
+                                                        onChange={e => setRetainReadiness(e.target.checked)}
+                                                        disabled={!!customYaml}
+                                                    />
+                                                    <span><i className='fa fa-check'/></span>
+                                                </span>
+                                                <label htmlFor='retain-readiness'>Retain Readiness Probes</label>
+                                            </div>
+                                            <div className='debug-pod-tab__form-checkbox'>
+                                                <span className='argo-checkbox'>
+                                                    <input
+                                                        type='checkbox'
+                                                        id='retain-startup-probe'
+                                                        checked={retainStartupProbe}
+                                                        onChange={e => setRetainStartupProbe(e.target.checked)}
+                                                        disabled={!!customYaml}
+                                                    />
+                                                    <span><i className='fa fa-check'/></span>
+                                                </span>
+                                                <label htmlFor='retain-startup-probe'>Retain Startup Probe</label>
+                                            </div>
+                                            <div className='debug-pod-tab__form-checkbox'>
+                                                <span className='argo-checkbox'>
+                                                    <input
+                                                        type='checkbox'
+                                                        id='retain-labels'
+                                                        checked={retainLabels}
+                                                        onChange={e => setRetainLabels(e.target.checked)}
+                                                        disabled={!!customYaml}
+                                                    />
+                                                    <span><i className='fa fa-check'/></span>
+                                                </span>
+                                                <label htmlFor='retain-labels'>Retain Labels</label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -269,7 +281,11 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                 </button>
                             )}
                         </div>
-                        <YamlEditor input={targetPod} onSave={async customYaml => setCustomYaml(customYaml)}/>
+                        <YamlEditor 
+                            input={targetPod} 
+                            onSave={async customYaml => setCustomYaml(customYaml)}
+                            onEditingStateChange={setIsYamlEditing}
+                        />
                     </>
                 ) : (
                     <Loader />
