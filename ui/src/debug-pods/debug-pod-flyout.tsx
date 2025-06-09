@@ -95,6 +95,14 @@ export const DebugPodFlyout = ({ selectedPod, onClose, setNotification }: DebugP
                             CONNECT
                         </span>
                     </button>
+                    <a href={`/applications/${getApplicationName()}`}>
+                        <button className='argo-button argo-button--base-o'>
+                            <i className='argo-icon argo-icon-application' />{' '}
+                            <span className='show-for-large'>
+                                APPLICATION
+                            </span>
+                        </button>
+                    </a>
                 </div>
             </div>
             {(selectedPod && (

@@ -8,7 +8,7 @@ import {Event} from '../models/event-models';
 const APPLICATION_HEADER_NAME = 'Argocd-Application-Name';
 const APPLICATION_HEADER_VALUE = 'argocd:argocd-debug-pod-extension';
 const PROJECT_HEADER_NAME = 'Argocd-Project-Name';
-const PROJECT_HEADER_VALUE = 'default';
+const PROJECT_HEADER_VALUE = 'argocd-debug-pod-extension';
 
 export function getDebugPods(): Promise<DebugPod[]> {
     return call(() => 
