@@ -26,10 +26,10 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
     useEffect(() => {
         if (sourcePod) {
             setDebugContainers(new Set(sourcePod.spec.containers.length > 0 ? [sourcePod.spec.containers[0].name] : []));
-            setRetainLiveness(false);
-            setRetainReadiness(false);
-            setRetainStartupProbe(false);
             setRetainLabels(true);
+            setRetainReadiness(true);
+            setRetainLiveness(false);
+            setRetainStartupProbe(false);
             setCustomYaml(null);
         }
     }, [sourcePod]);
@@ -96,7 +96,24 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
         });
     }, [props.resource.metadata.name, props.resource.metadata.namespace, props.application.metadata.name]);
 
+    const isDagerousPod = (targetPod: any) => {
+        if (!targetPod) {
+            return false;
+        }
+
+        const hasLabels = targetPod.metadata.labels && Object.keys(targetPod.metadata.labels).length > 0;
+        const hasReadinessProbe = targetPod.spec.containers.some(container => container.readinessProbe);
+        
+        return hasLabels || !hasReadinessProbe;
+    }
+
     const handleCreateDebugPod = async () => {
+        if (isDagerousPod(targetPod)) {
+            if (!window.confirm('You are about to create a pod with labels and without readiness probes. If this pod has a service, it will receive traffic even though it is not ready, which will lead to timeouts and errors. Do you want to continue?')) {
+                return;
+            }
+        }
+
         if (!window.confirm('Are you sure you want to create a debug pod?')) {
             return;
         }
@@ -217,14 +234,14 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                                 <span className='argo-checkbox'>
                                                     <input
                                                         type='checkbox'
-                                                        id='retain-liveness'
-                                                        checked={retainLiveness}
-                                                        onChange={e => setRetainLiveness(e.target.checked)}
+                                                        id='retain-labels'
+                                                        checked={retainLabels}
+                                                        onChange={e => setRetainLabels(e.target.checked)}
                                                         disabled={!!customYaml}
                                                     />
                                                     <span><i className='fa fa-check'/></span>
                                                 </span>
-                                                <label htmlFor='retain-liveness'>Retain Liveness Probes</label>
+                                                <label htmlFor='retain-labels'>Retain Labels</label>
                                             </div>
                                             <div className='debug-pod-tab__form-checkbox'>
                                                 <span className='argo-checkbox'>
@@ -243,6 +260,19 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                                 <span className='argo-checkbox'>
                                                     <input
                                                         type='checkbox'
+                                                        id='retain-liveness'
+                                                        checked={retainLiveness}
+                                                        onChange={e => setRetainLiveness(e.target.checked)}
+                                                        disabled={!!customYaml}
+                                                    />
+                                                    <span><i className='fa fa-check'/></span>
+                                                </span>
+                                                <label htmlFor='retain-liveness'>Retain Liveness Probes</label>
+                                            </div>
+                                            <div className='debug-pod-tab__form-checkbox'>
+                                                <span className='argo-checkbox'>
+                                                    <input
+                                                        type='checkbox'
                                                         id='retain-startup-probe'
                                                         checked={retainStartupProbe}
                                                         onChange={e => setRetainStartupProbe(e.target.checked)}
@@ -251,19 +281,6 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                                     <span><i className='fa fa-check'/></span>
                                                 </span>
                                                 <label htmlFor='retain-startup-probe'>Retain Startup Probe</label>
-                                            </div>
-                                            <div className='debug-pod-tab__form-checkbox'>
-                                                <span className='argo-checkbox'>
-                                                    <input
-                                                        type='checkbox'
-                                                        id='retain-labels'
-                                                        checked={retainLabels}
-                                                        onChange={e => setRetainLabels(e.target.checked)}
-                                                        disabled={!!customYaml}
-                                                    />
-                                                    <span><i className='fa fa-check'/></span>
-                                                </span>
-                                                <label htmlFor='retain-labels'>Retain Labels</label>
                                             </div>
                                         </div>
                                     </div>
