@@ -96,19 +96,20 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
         });
     }, [props.resource.metadata.name, props.resource.metadata.namespace, props.application.metadata.name]);
 
-    const isDagerousPod = (targetPod: any) => {
+    const isDagerousPod = (targetPod: any, sourcePod: any) => {
         if (!targetPod) {
             return false;
         }
 
         const hasLabels = targetPod.metadata.labels && Object.keys(targetPod.metadata.labels).length > 0;
         const hasReadinessProbe = targetPod.spec.containers.some(container => container.readinessProbe);
+        const sourcePodHasReadinessProbe = sourcePod.spec.containers.some(container => container.readinessProbe);
         
-        return hasLabels || !hasReadinessProbe;
+        return hasLabels && !hasReadinessProbe && sourcePodHasReadinessProbe;
     }
 
     const handleCreateDebugPod = async () => {
-        if (isDagerousPod(targetPod)) {
+        if (isDagerousPod(targetPod, sourcePod)) {
             if (!window.confirm('You are about to create a pod with labels and without readiness probes. If this pod has a service, it will receive traffic even though it is not ready, which will lead to timeouts and errors. Do you want to continue?')) {
                 return;
             }
