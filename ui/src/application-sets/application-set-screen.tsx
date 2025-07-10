@@ -159,6 +159,43 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
         }
     };
 
+    const handleRollingRestartAll = async () => {
+        const apps = Array.from(selectedApps).map(appKey => applications[appKey]?.application);
+        
+        if (!window.confirm(`Are you sure you want to perform a rolling restart on ${apps.length} application(s)? This will restart all pods in these applications.`)) {
+            return;
+        }
+
+        setIsInAction(true);
+        setLoading(true);
+        setFetchProgress({completed: 0, total: apps.length});
+
+        try {
+            await Promise.all(apps.map(async (app, index) => {
+                await runRollingRestart(app);
+                setFetchProgress(fp => ({...fp, completed: fp.completed + 1}));
+            }));
+
+            setNotification({
+                message: `Successfully initiated rolling restart for ${apps.length} applications`,
+                type: 'success'
+            });
+
+            setSelectedApps(new Set());
+            setIsInAction(false);
+            setLoading(false);
+            await refreshApplications();
+        } catch (e) {
+            setNotification({
+                message: `Failed to execute rolling restart: ${e.message}`,
+                type: 'error',
+                requireApproval: true
+            });
+            setIsInAction(false);
+            setLoading(false);
+        }
+    };
+
     const runRolloutAction = async (action: string, app: Application) => {
         const rollout = app.status.resources?.find(r => 
             r.kind === 'Rollout' && 
@@ -181,6 +218,53 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
             },
             action
         );
+    };
+
+    const runRollingRestart = async (app: Application) => {
+        // First try to find a Rollout resource
+        const rollout = app.status.resources?.find(r => 
+            r.kind === 'Rollout' && 
+            r.group === 'argoproj.io'
+        );
+        
+        if (rollout) {
+            // If Rollout exists, restart it
+            await runResourceAction(
+                app.metadata.name,
+                app.metadata.namespace,
+                {
+                    group: rollout.group,
+                    kind: rollout.kind,
+                    name: rollout.name,
+                    namespace: rollout.namespace,
+                    version: rollout.version
+                },
+                'restart'
+            );
+        } else {
+            // If no Rollout, look for a Deployment
+            const deployment = app.status.resources?.find(r => 
+                r.kind === 'Deployment' && 
+                r.group === 'apps'
+            );
+            
+            if (!deployment) {
+                throw new Error('No Rollout or Deployment resource found');
+            }
+
+            await runResourceAction(
+                app.metadata.name,
+                app.metadata.namespace,
+                {
+                    group: deployment.group,
+                    kind: deployment.kind,
+                    name: deployment.name,
+                    namespace: deployment.namespace,
+                    version: deployment.version
+                },
+                'restart'
+            );
+        }
     };
 
     // Auto-refresh every 20 seconds when the screen is shown
@@ -541,6 +625,13 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
                             disabled={selectedApps.size === 0 || isInAction}
                         >
                             <i className='fa fa-undo'/> Rollback
+                        </button>
+                        <button 
+                            className='argo-button argo-button--base' 
+                            onClick={handleRollingRestartAll}
+                            disabled={selectedApps.size === 0 || isInAction}
+                        >
+                            <i className='fa fa-sync-alt'/> Rolling Restart {selectedApps.size} / {totalApps}
                         </button>
                         <button 
                             className='argo-button argo-button--base' 
