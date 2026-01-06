@@ -13,8 +13,8 @@
     "@types/react": "^16.9.3",
     "@types/uuid": "^10.0.0",
     "css-loader": "^6.7.3",
-    "monaco-editor": "^0.52.2",
     "mini-css-extract-plugin": "^2.7.2",
+    "monaco-editor": "^0.52.2",
     "node-sass": "^8.0.0",
     "raw-loader": "^4.0.2",
     "sass": "^1.34.1",
@@ -30,8 +30,9 @@
     "@tippy.js/react": "^3.1.1",
     "classnames": "^2.5.1",
     "deepmerge": "^3.2.0",
+    "eventsource": "^4.0.0",
     "history": "^4.10.1",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "4.1.1",
     "moment": "^2.30.1",
     "path": "^0.12.7",
     "react-autocomplete": "1.8.1",
@@ -43,7 +44,10 @@
     "tippy.js": "^6.3.7",
     "uuid": "^9.0.0",
     "xterm": "^4.19.0",
-    "xterm-addon-fit": "^0.5.0",
-    "eventsource": "^4.0.0"
+    "xterm-addon-fit": "^0.5.0"
+  },
+  "resolutions": {
+    "qs": "6.14.1",
+    "form-data": "4.0.4"
   }
 }
