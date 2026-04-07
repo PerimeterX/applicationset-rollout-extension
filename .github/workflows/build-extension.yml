@@ -1,0 +1,46 @@
+name: Build and Commit Extension
+
+on:
+  push:
+    branches:
+      - '**' # Run on all branches
+
+permissions:
+  contents: write # Needed to push changes back to the repository
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Required for git-auto-commit-action to trigger other workflows if needed
+          # and to have full history for the commit
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # LTS version, adjust if you need older/newer Node
+          cache: 'yarn'
+          cache-dependency-path: ui/yarn.lock
+
+      - name: Install Dependencies
+        working-directory: ./ui
+        run: yarn install --frozen-lockfile
+
+      - name: Build Extension
+        working-directory: ./ui
+        run: npm run build
+
+      - name: Commit and Push built assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Stage the built assets
+          git add ui/dist/extension.tar ui/dist/resources/argoproj.io/ApplicationSet/ui/extensions-applicationset.js
+          # Commit all changes and ignore failure if there are no changes
+          git commit -a -m "chore: auto-build and update UI extension assets" || echo "No changes to commit"
+          # Push to the branch that triggered the workflow
+          git push origin HEAD

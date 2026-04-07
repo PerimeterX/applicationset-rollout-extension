@@ -44,6 +44,93 @@ function CodeSection({ title, desc, code }) {
 }
 
 export const DebugPodConnectFlyout = ({ show, selectedPod, onClose }: DebugPodConnectFlyoutProps) => {
+    const isSupportedEnv = selectedPod && ['gke', 'aks', 'eks'].includes(selectedPod.environment);
+
+    const getKubectlInstallCommand = () => {
+        return `# Install kubectl if not installed
+if ! command -v kubectl &> /dev/null; then
+    echo "Installing kubectl..."
+    if command -v brew &> /dev/null; then
+        brew install kubectl
+    else
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+        rm kubectl
+    fi
+fi`;
+    };
+
+    const getEnvCommands = () => {
+        if (!selectedPod) return '';
+
+        switch (selectedPod.environment) {
+            case 'gke':
+                return `# Install gke-gcloud-auth-plugin if not installed
+if ! command -v gke-gcloud-auth-plugin &> /dev/null; then
+    echo "Installing gke-gcloud-auth-plugin..."
+    gcloud components install gke-gcloud-auth-plugin
+fi &&
+
+# Get credentials for the cluster if not already present
+if ! kubectl config get-contexts -o name | grep -q " ${selectedPod.cluster} "; then
+    echo "Getting credentials for the cluster..."
+    gcloud container clusters get-credentials ${selectedPod.cluster} --region ${selectedPod.region} --project ${selectedPod.projectId}
+    kubectl config rename-context gke_${selectedPod.projectId}_${selectedPod.region}_${selectedPod.cluster} ${selectedPod.cluster}
+fi`;
+            case 'aks':
+                return `# Install Azure CLI if not installed
+if ! command -v az &> /dev/null; then
+    echo "Installing Azure CLI..."
+    if command -v brew &> /dev/null; then
+        brew install azure-cli
+    else
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    fi
+fi &&
+
+# Install kubelogin if not installed (required for AAD authentication)
+if ! command -v kubelogin &> /dev/null; then
+    echo "Installing kubelogin..."
+    az aks install-cli
+fi &&
+
+# Get credentials for the cluster if not already present
+if ! kubectl config get-contexts -o name | grep -q " ${selectedPod.cluster} "; then
+    echo "Getting credentials for the cluster..."
+    az aks get-credentials --resource-group ${selectedPod.projectId} --name ${selectedPod.cluster} --overwrite-existing
+fi`;
+            case 'eks':
+                return `# Install AWS CLI if not installed
+if ! command -v aws &> /dev/null; then
+    echo "Installing AWS CLI..."
+    if command -v brew &> /dev/null; then
+        brew install awscli
+    else
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+        rm -rf aws awscliv2.zip
+    fi
+fi &&
+
+# Get credentials for the cluster if not already present
+if ! kubectl config get-contexts -o name | grep -q " ${selectedPod.cluster} "; then
+    echo "Getting credentials for the cluster..."
+    aws eks update-kubeconfig --region ${selectedPod.region} --name ${selectedPod.cluster} --alias ${selectedPod.cluster}
+fi`;
+            default:
+                return '';
+        }
+    };
+
+    const connectClusterCode = `${getKubectlInstallCommand()} &&
+
+${getEnvCommands()} &&
+
+# Switch to the context
+echo "Switching kubectl context..."
+kubectl config use-context ${selectedPod?.cluster}`;
+
     return (
         <SlidingPanel
             isShown={show}
@@ -59,35 +146,13 @@ export const DebugPodConnectFlyout = ({ show, selectedPod, onClose }: DebugPodCo
                 </div>
             )}
         >
-            {selectedPod?.environment === 'gke' ? (
+            {isSupportedEnv ? (
                 <div>
                     <div>
                         <CodeSection
                             title="Connect to the cluster"
                             desc={<span>Apply the following commands if you haven't connected to the cluster <b>{selectedPod.cluster}</b> before</span>}
-                            code={`# Install kubectl if not installed
-if ! command -v kubectl &> /dev/null; then
-    echo "Installing kubectl..."
-    gcloud components install kubectl
-fi &&
-
-# Install gke-gcloud-auth-plugin if not installed
-if ! command -v gke-gcloud-auth-plugin &> /dev/null; then
-    echo "Installing gke-gcloud-auth-plugin..."
-    gcloud components install gke-gcloud-auth-plugin
-fi &&
-
-# Get credentials for the cluster if not already present
-if ! kubectl config get-contexts -o name | grep -q " ${selectedPod.cluster} "; then
-    echo "Getting credentials for the cluster..."
-    gcloud container clusters get-credentials ${selectedPod.cluster} --region ${selectedPod.region} --project ${selectedPod.projectId}
-    kubectl config rename-context gke_${selectedPod.projectId}_${selectedPod.region}_${selectedPod.cluster} ${selectedPod.cluster}
-fi &&
-
-# Switch to the context
-echo "Switching kubectl context..."
-kubectl config use-context ${selectedPod.cluster}
-`}
+                            code={connectClusterCode}
                         />
                     </div>
                     <div>
