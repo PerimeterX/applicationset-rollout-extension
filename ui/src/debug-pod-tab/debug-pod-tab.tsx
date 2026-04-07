@@ -23,19 +23,6 @@ export const DebugPodTab: React.FC<{ resource: State, application: Application }
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isYamlEditing, setIsYamlEditing] = useState<boolean>(false);
 
-    const defaultEnvironment = useMemo(() => {
-        const dest = props.application?.spec?.destination?.server || props.application?.spec?.destination?.name || '';
-        if (dest.includes('azmk8s.io') || dest.includes('aks')) return 'aks';
-        if (dest.includes('eks.amazonaws.com') || dest.includes('eks')) return 'eks';
-        return 'gke';
-    }, [props.application]);
-
-    const [environment, setEnvironment] = useState<string>(defaultEnvironment);
-
-    useEffect(() => {
-        setEnvironment(defaultEnvironment);
-    }, [defaultEnvironment]);
-
     useEffect(() => {
         if (sourcePod) {
             setDebugContainers(new Set(sourcePod.spec.containers.length > 0 ? [sourcePod.spec.containers[0].name] : []));
@@ -137,13 +124,26 @@ export const DebugPodTab: React.FC<{ resource: State, application: Application }
             // Extract the cluster URL or name from destination
             let clusterDestination = props.application.spec.destination.name || props.application.spec.destination.server;
 
-            if (environment === 'aks') {
-                // To force the backend to search in Azure instead of defaulting to GCP, we must pass the server URL (which contains azmk8s.io) 
-                // instead of the name for AKS clusters.
-                clusterDestination = props.application.spec.destination.server || clusterDestination;
+            // Attempt creating the debug pod using standard destination
+            let debugPod: any;
+            try {
+                debugPod = await createDebugPod(clusterDestination, props.resource.metadata.name, props.application.metadata.name, targetPod, 'gke');
+            } catch (gkeError: any) {
+                try {
+                    // Try AWS next
+                    debugPod = await createDebugPod(clusterDestination, props.resource.metadata.name, props.application.metadata.name, targetPod, 'eks');
+                } catch (eksError: any) {
+                    try {
+                        // Finally try AKS, which requires the server URL
+                        const aksClusterDestination = props.application.spec.destination.server || clusterDestination;
+                        debugPod = await createDebugPod(aksClusterDestination, props.resource.metadata.name, props.application.metadata.name, targetPod, 'aks');
+                    } catch (aksError: any) {
+                        // All providers failed, throw original error to trigger notification
+                        throw gkeError;
+                    }
+                }
             }
-            
-            const debugPod = await createDebugPod(clusterDestination, props.resource.metadata.name, props.application.metadata.name, targetPod, environment);
+
             setCreatedPod({
                 cluster: debugPod.cluster,
                 namespace: debugPod.pod.metadata.namespace,
@@ -248,22 +248,6 @@ export const DebugPodTab: React.FC<{ resource: State, application: Application }
                                                     <label htmlFor={`debug-${container.name}`}>{container.name}</label>
                                                 </div>
                                             ))}
-                                        </div>
-                                    </div>
-
-                                    <div className='debug-pod-tab__form-section'>
-                                        <div className='debug-pod-tab__form-title'>Cloud Provider</div>
-                                        <div style={{ marginBottom: '15px' }}>
-                                            <select
-                                                value={environment}
-                                                onChange={e => setEnvironment(e.target.value)}
-                                                disabled={!!customYaml}
-                                                style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #ccd6dd', width: '200px' }}
-                                            >
-                                                <option value="gke">Google Cloud (GKE)</option>
-                                                <option value="aks">Azure (AKS)</option>
-                                                <option value="eks">AWS (EKS)</option>
-                                            </select>
                                         </div>
                                     </div>
 
