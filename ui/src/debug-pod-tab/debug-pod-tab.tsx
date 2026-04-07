@@ -23,6 +23,19 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isYamlEditing, setIsYamlEditing] = useState<boolean>(false);
 
+    const defaultEnvironment = useMemo(() => {
+        const dest = props.application?.spec?.destination?.server || props.application?.spec?.destination?.name || '';
+        if (dest.includes('azmk8s.io') || dest.includes('aks')) return 'aks';
+        if (dest.includes('eks.amazonaws.com') || dest.includes('eks')) return 'eks';
+        return 'gke';
+    }, [props.application]);
+
+    const [environment, setEnvironment] = useState<string>(defaultEnvironment);
+
+    useEffect(() => {
+        setEnvironment(defaultEnvironment);
+    }, [defaultEnvironment]);
+
     useEffect(() => {
         if (sourcePod) {
             setDebugContainers(new Set(sourcePod.spec.containers.length > 0 ? [sourcePod.spec.containers[0].name] : []));
@@ -124,7 +137,7 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
             // Extract the cluster URL or name from destination
             const clusterDestination = props.application.spec.destination.name || props.application.spec.destination.server;
             
-            const debugPod = await createDebugPod(clusterDestination, props.resource.metadata.name, props.application.metadata.name, targetPod);
+            const debugPod = await createDebugPod(clusterDestination, props.resource.metadata.name, props.application.metadata.name, targetPod, environment);
             setCreatedPod({
                 cluster: debugPod.cluster,
                 namespace: debugPod.pod.metadata.namespace,
@@ -229,6 +242,22 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                                     <label htmlFor={`debug-${container.name}`}>{container.name}</label>
                                                 </div>
                                             ))}
+                                        </div>
+                                    </div>
+
+                                    <div className='debug-pod-tab__form-section'>
+                                        <div className='debug-pod-tab__form-title'>Cloud Provider</div>
+                                        <div style={{ marginBottom: '15px' }}>
+                                            <select 
+                                                value={environment} 
+                                                onChange={e => setEnvironment(e.target.value)} 
+                                                disabled={!!customYaml}
+                                                style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #ccd6dd', width: '200px' }}
+                                            >
+                                                <option value="gke">Google Cloud (GKE)</option>
+                                                <option value="aks">Azure (AKS)</option>
+                                                <option value="eks">AWS (EKS)</option>
+                                            </select>
                                         </div>
                                     </div>
 
