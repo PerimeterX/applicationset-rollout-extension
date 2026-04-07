@@ -120,7 +120,11 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
         }
         try {
             setIsLoading(true);
-            const debugPod = await createDebugPod(props.application.spec.destination.name, props.resource.metadata.name, props.application.metadata.name, targetPod);
+            
+            // Extract the cluster URL or name from destination
+            const clusterDestination = props.application.spec.destination.name || props.application.spec.destination.server;
+            
+            const debugPod = await createDebugPod(clusterDestination, props.resource.metadata.name, props.application.metadata.name, targetPod);
             setCreatedPod({
                 cluster: debugPod.cluster,
                 namespace: debugPod.pod.metadata.namespace,

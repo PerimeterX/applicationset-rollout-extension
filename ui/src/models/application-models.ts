@@ -8,7 +8,8 @@ export interface ApplicationSpec {
 }
 
 export interface ApplicationDestination {
-    name: string;
+    name?: string;
+    server?: string;
     namespace: string;
 }
 
