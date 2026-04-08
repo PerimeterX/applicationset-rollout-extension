@@ -2,8 +2,9 @@ name: Build and Commit Extension
 
 on:
   push:
-    branches:
-      - '**' # Run on all branches
+    branches-ignore:
+      - main
+
 
 permissions:
   contents: write # Needed to push changes back to the repository
@@ -14,10 +15,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          # Required for git-auto-commit-action to trigger other workflows if needed
-          # and to have full history for the commit
-          fetch-depth: 0
+
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
