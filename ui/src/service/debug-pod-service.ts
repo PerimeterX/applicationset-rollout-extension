@@ -19,12 +19,12 @@ export function getDebugPods(): Promise<DebugPod[]> {
     );
 }
 
-export function createDebugPod(cluster: string, originalPodName: string, applicationName: string, pod: Pod): Promise<DebugPod> {
+export function createDebugPod(cluster: string, originalPodName: string, applicationName: string, pod: Pod, environment?: string): Promise<DebugPod> {
     return call(() => 
         requests.postJson('/extensions/debugpods/debug_pod', true)
             .set(APPLICATION_HEADER_NAME, APPLICATION_HEADER_VALUE)
             .set(PROJECT_HEADER_NAME, PROJECT_HEADER_VALUE)
-            .send({cluster, originalPodName, applicationName, pod})
+            .send({cluster, originalPodName, applicationName, pod, environment})
             .then(res => res.body)
     );
 }

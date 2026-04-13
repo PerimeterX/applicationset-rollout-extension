@@ -1,16 +1,16 @@
 import * as React from 'react';
-import {useEffect, useMemo, useState} from 'react';
-import {YamlEditor} from '../shared-components/yaml-editor/yaml-editor';
-import {Pod} from '../models/pod-models';
-import {Application, State} from '../models/application-models';
-import {getPod, createDebugPod, getDebugPods} from '../service/debug-pod-service';
-import {Tooltip} from '../shared-components/tooltip';
-import {NotificationBar, Notification} from '../shared-components/notification-bar/notification-bar';
-import {DebugPodEventsTab, DebugPodEventsTabProps} from '../debug-pods/debug-pod-events-tab';
+import { useEffect, useMemo, useState } from 'react';
+import { YamlEditor } from '../shared-components/yaml-editor/yaml-editor';
+import { Pod } from '../models/pod-models';
+import { Application, State } from '../models/application-models';
+import { getPod, createDebugPod, getDebugPods } from '../service/debug-pod-service';
+import { Tooltip } from '../shared-components/tooltip';
+import { NotificationBar, Notification } from '../shared-components/notification-bar/notification-bar';
+import { DebugPodEventsTab, DebugPodEventsTabProps } from '../debug-pods/debug-pod-events-tab';
 import './debug-pod-tab.scss';
 import { Loader } from '../shared-components/loader/loader';
 
-export const DebugPodTab: React.FC<{resource: State, application: Application}> = (props: {resource: State, application: Application}) => {
+export const DebugPodTab: React.FC<{ resource: State, application: Application }> = (props: { resource: State, application: Application }) => {
     const [sourcePod, setSourcePod] = useState<Pod | null>(null);
     const [debugContainers, setDebugContainers] = useState<Set<string>>(new Set());
     const [retainLiveness, setRetainLiveness] = useState<boolean>(false);
@@ -42,7 +42,7 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
         if (customYaml) {
             return customYaml;
         }
-        
+
         // create a deep copy of the source pod
         const targetPod = JSON.parse(JSON.stringify(sourcePod));
 
@@ -104,7 +104,7 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
         const hasLabels = targetPod.metadata.labels && Object.keys(targetPod.metadata.labels).length > 0;
         const hasReadinessProbe = targetPod.spec.containers.some(container => container.readinessProbe);
         const sourcePodHasReadinessProbe = sourcePod.spec.containers.some(container => container.readinessProbe);
-        
+
         return hasLabels && !hasReadinessProbe && sourcePodHasReadinessProbe;
     }
 
@@ -120,11 +120,30 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
         }
         try {
             setIsLoading(true);
-            
+
             // Extract the cluster URL or name from destination
-            const clusterDestination = props.application.spec.destination.name || props.application.spec.destination.server;
-            
-            const debugPod = await createDebugPod(clusterDestination, props.resource.metadata.name, props.application.metadata.name, targetPod);
+            let clusterDestination = props.application.spec.destination.name || props.application.spec.destination.server;
+
+            // Attempt creating the debug pod using standard destination
+            let debugPod: any;
+            try {
+                debugPod = await createDebugPod(clusterDestination, props.resource.metadata.name, props.application.metadata.name, targetPod, 'gke');
+            } catch (gkeError: any) {
+                try {
+                    // Try AWS next
+                    debugPod = await createDebugPod(clusterDestination, props.resource.metadata.name, props.application.metadata.name, targetPod, 'eks');
+                } catch (eksError: any) {
+                    try {
+                        // Finally try AKS, which requires the server URL
+                        const aksClusterDestination = props.application.spec.destination.server || clusterDestination;
+                        debugPod = await createDebugPod(aksClusterDestination, props.resource.metadata.name, props.application.metadata.name, targetPod, 'aks');
+                    } catch (aksError: any) {
+                        // All providers failed, throw original error to trigger notification
+                        throw gkeError;
+                    }
+                }
+            }
+
             setCreatedPod({
                 cluster: debugPod.cluster,
                 namespace: debugPod.pod.metadata.namespace,
@@ -174,7 +193,7 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                 className="argo-button argo-button--base"
                                 onClick={() => goToDebugPodPage()}
                             >
-                                <i className="fa fa-plug-circle-check" style={{marginRight: 6}} />
+                                <i className="fa fa-plug-circle-check" style={{ marginRight: 6 }} />
                                 Open Debug Pod Page
                             </button>
                         </div>
@@ -187,13 +206,13 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                 Edit the Pod manifest using the quick options and the manual edit below, and click the Create Debug Pod button to spin up a new Debug Pod
                             </div>
                             <Tooltip content="Please save or cancel your manual edits before creating the debug pod" enabled={isYamlEditing}>
-                                <div style={{display: 'inline-block'}}>
+                                <div style={{ display: 'inline-block' }}>
                                     <button
                                         className="argo-button argo-button--base"
                                         onClick={handleCreateDebugPod}
                                         disabled={isYamlEditing}
                                     >
-                                        <i className="fa fa-bug" style={{marginRight: 6}} />
+                                        <i className="fa fa-bug" style={{ marginRight: 6 }} />
                                         Create Debug Pod
                                     </button>
                                 </div>
@@ -224,7 +243,7 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                                                 setDebugContainers(newSet);
                                                             }}
                                                         />
-                                                        <span><i className='fa fa-check'/></span>
+                                                        <span><i className='fa fa-check' /></span>
                                                     </span>
                                                     <label htmlFor={`debug-${container.name}`}>{container.name}</label>
                                                 </div>
@@ -244,7 +263,7 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                                         onChange={e => setRetainLabels(e.target.checked)}
                                                         disabled={!!customYaml}
                                                     />
-                                                    <span><i className='fa fa-check'/></span>
+                                                    <span><i className='fa fa-check' /></span>
                                                 </span>
                                                 <label htmlFor='retain-labels'>Retain Labels</label>
                                             </div>
@@ -257,7 +276,7 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                                         onChange={e => setRetainReadiness(e.target.checked)}
                                                         disabled={!!customYaml}
                                                     />
-                                                    <span><i className='fa fa-check'/></span>
+                                                    <span><i className='fa fa-check' /></span>
                                                 </span>
                                                 <label htmlFor='retain-readiness'>Retain Readiness Probes</label>
                                             </div>
@@ -270,7 +289,7 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                                         onChange={e => setRetainLiveness(e.target.checked)}
                                                         disabled={!!customYaml}
                                                     />
-                                                    <span><i className='fa fa-check'/></span>
+                                                    <span><i className='fa fa-check' /></span>
                                                 </span>
                                                 <label htmlFor='retain-liveness'>Retain Liveness Probes</label>
                                             </div>
@@ -283,7 +302,7 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                                         onChange={e => setRetainStartupProbe(e.target.checked)}
                                                         disabled={!!customYaml}
                                                     />
-                                                    <span><i className='fa fa-check'/></span>
+                                                    <span><i className='fa fa-check' /></span>
                                                 </span>
                                                 <label htmlFor='retain-startup-probe'>Retain Startup Probe</label>
                                             </div>
@@ -303,8 +322,8 @@ export const DebugPodTab: React.FC<{resource: State, application: Application}> 
                                 </button>
                             )}
                         </div>
-                        <YamlEditor 
-                            input={targetPod} 
+                        <YamlEditor
+                            input={targetPod}
                             onSave={async customYaml => setCustomYaml(customYaml)}
                             onEditingStateChange={setIsYamlEditing}
                         />
