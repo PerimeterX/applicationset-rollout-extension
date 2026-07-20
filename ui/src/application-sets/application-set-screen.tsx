@@ -536,7 +536,7 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
             <div className='row'>
                 <div className='label'>Rollout Status:</div>
                 <div className='value'>
-                    <span className={`status status--${status.toLowerCase().split(' ')[0]}`}>
+                    <span className={`status status--${(status || 'unknown').toLowerCase().split(' ')[0]}`}>
                         {status === 'Suspended' ? (
                             <i className='fa fa-pause-circle' />
                         ) : status === 'Processing' ? (
@@ -816,7 +816,7 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
                                 <div className='row'>
                                     <div className='label'>Sync Status:</div>
                                     <div className='value'>
-                                        <span className={`status status--${app.status.sync.status.toLowerCase()}`}>
+                                        <span className={`status status--${(app.status?.sync?.status || 'unknown').toLowerCase()}`}>
                                             {app.status.sync.status === 'OutOfSync' ? (
                                                 <i className='fa fa-arrow-alt-circle-up' />
                                             ) : app.status.sync.status === 'Unknown' ? (
@@ -830,7 +830,7 @@ export const ApplicationSetScreen = ({ appSet, onClose }: ApplicationSetScreenPr
                                 <div className='row'>
                                     <div className='label'>App Status:</div>
                                     <div className='value'>
-                                        <span className={`status status--${app.status.health.status.toLowerCase()}`}>
+                                        <span className={`status status--${(app.status?.health?.status || 'unknown').toLowerCase()}`}>
                                             {app.status.health.status === 'Degraded' ? (
                                                 <i className='fa fa-heart-broken' />
                                             ) : app.status.health.status === 'Missing' ? (
