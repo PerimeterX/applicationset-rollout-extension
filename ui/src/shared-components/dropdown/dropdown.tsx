@@ -41,10 +41,12 @@ export class DropDown extends React.Component<DropDownProps, DropDownState> {
             children = this.props.children as React.ReactNode;
         }
 
+        const Anchor = this.props.anchor;
+
         return (
             <div className='argo-dropdown' ref={(el) => this.el = el}>
                 <div qe-id={this.props.qeId} className='argo-dropdown__anchor' onClick={(event) => { this.open(); event.stopPropagation(); }}>
-                    <this.props.anchor/>
+                    <Anchor />
                 </div>
                 {ReactDOM.createPortal((
                     <div className={classNames('argo-dropdown__content', { 'opened': this.state.opened, 'is-menu': this.props.isMenu })}

@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import * as React from 'react';
-import * as ReactAutocomplete from 'react-autocomplete';
+import ReactAutocomplete from 'react-autocomplete';
 
 export interface AutocompleteApi {
     refresh(): any;

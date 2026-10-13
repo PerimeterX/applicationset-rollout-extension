@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useState, useEffect} from 'react';
 
-import * as moment from 'moment';
+import moment from 'moment';
 import {DropDownMenu} from '../shared-components/dropdown-menu';
 import {ApplicationSet, Application, ApplicationResource, ResourceTree} from '../models/application-set-models';
 import {getApplication, runResourceAction, syncApplication, getResourceTree} from '../service/application-set-service';

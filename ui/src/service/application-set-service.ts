@@ -1,4 +1,4 @@
-import * as deepMerge from 'deepmerge';
+import deepMerge from 'deepmerge';
 import requests from './requests';
 import {callWithRetries, call} from './call';
 import {ApplicationSet, Resource, Application, ResourceTree} from '../models/application-set-models';
