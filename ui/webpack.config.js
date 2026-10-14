@@ -29,6 +29,9 @@ const config = {
         {
             'react': 'React',
             'react-dom': 'ReactDOM',
+            'react/jsx-runtime': 'ReactJSXRuntime',
+            'react/jsx-dev-runtime': 'ReactJSXRuntime',
+            'moment': 'Moment',
             'monaco-editor': 'monaco'
         }
     ],

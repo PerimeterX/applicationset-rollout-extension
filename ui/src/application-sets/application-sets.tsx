@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as moment from 'moment';
+import moment from 'moment';
 
 import {KeybindingProvider} from '../shared-components/keypress';
 import {DataLoader} from '../shared-components/data-loader';

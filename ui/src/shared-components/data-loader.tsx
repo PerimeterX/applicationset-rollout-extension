@@ -99,9 +99,14 @@ export class DataLoader<D = {}, I = undefined> extends React.Component<LoaderPro
             return error;
         }
         if (this.state.dataWrapper) {
-            return this.props.children(this.state.dataWrapper.data);
+            const {children} = this.props;
+            if (typeof children === 'function') {
+                return children(this.state.dataWrapper.data);
+            }
+            return null;
         }
-        return this.props.loadingRenderer ? <this.props.loadingRenderer/> : <p style={style}>Loading...</p>;
+        const Loading = this.props.loadingRenderer;
+        return Loading ? React.createElement(Loading) : <p style={style}>Loading...</p>;
     }
 
     public reload() {
